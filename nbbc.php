@@ -782,7 +782,7 @@ return "<img src=\"" . htmlspecialchars($content) . "\" alt=\""
 . htmlspecialchars(basename($content)) . "\" class=\"bbcode_img\" />";
 }
 }
-return htmlspecialchars($params['_tag']) . $content . htmlspecialchars($params['_endtag']);
+return htmlspecialchars($params['_tag']) . htmlspecialchars($content) . htmlspecialchars($params['_endtag']);
 }
 function DoRule($bbcode, $action, $name, $default, $params, $content) {
 if ($action == BBCODE_CHECK) return true;
