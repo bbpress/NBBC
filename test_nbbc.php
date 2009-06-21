@@ -694,7 +694,7 @@ h1 { text-align: center; }
 		Array(
 			'descr' => "[img] disallows HTML content.",
 			'bbcode' => "This is Google's logo: [img]<a href='javascript:alert(\"foo\")'>click me</a>[/img].",
-			'html' => "This is Google's logo: [img]<a href='javascript:alert(\"foo\")'>click me</a>[/img].",
+			'html' => "This is Google's logo: [img]&lt;a href='javascript:alert(&quot;foo&quot;)'&gt;click me&lt;/a&gt;[/img].",
 		),
 		Array(
 			'descr' => "[img] can produce a local image.",
