@@ -1,4 +1,8 @@
 
+2009-06-21 / v1.4.2 / Phantom Inker (inker2576@yahoo.com)
+	* SECURITY FIX: [img] tag was allowing HTML content to be passed
+		through.
+
 2009-04-03 / v1.4.1 / Phantom Inker (inker2576@yahoo.com)
 	* Fixed documentation for [quote] tag's url= attribute.
 

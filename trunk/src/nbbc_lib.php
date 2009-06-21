@@ -522,7 +522,7 @@
 				}
 			}
 
-			return htmlspecialchars($params['_tag']) . $content . htmlspecialchars($params['_endtag']);
+			return htmlspecialchars($params['_tag']) . htmlspecialchars($content) . htmlspecialchars($params['_endtag']);
 		}
 
 		// Format a [rule] tag.  This substitutes the content provided by the BBCode

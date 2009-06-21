@@ -692,6 +692,11 @@ h1 { text-align: center; }
 			'html' => "This is Google's logo: [img]foobar:bar.jpg[/img].",
 		),
 		Array(
+			'descr' => "[img] disallows HTML content.",
+			'bbcode' => "This is Google's logo: [img]<a href='javascript:alert(\"foo\")'>click me</a>[/img].",
+			'html' => "This is Google's logo: [img]<a href='javascript:alert(\"foo\")'>click me</a>[/img].",
+		),
+		Array(
 			'descr' => "[img] can produce a local image.",
 			'bbcode' => "This is a smiley: [img]smile.gif[/img].",
 			'html' => "This is a smiley: <img src=\"smileys/smile.gif\" alt=\"smile.gif\" width=\"16\" height=\"16\" class=\"bbcode_img\" />.",
