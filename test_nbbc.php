@@ -561,6 +561,12 @@ h1 { text-align: center; }
 			'html' => "This is a test of the <a href=\"http://www.google.com\" class=\"bbcode_url\">emergency broadcasting system</a>.",
 		),
 		Array(
+			'descr' => "[url=http:...] gets converted correctly in plain mode.",
+			'bbcode' => "This is a test of the [url=http://www.google.com]emergency broadcasting system[/url].",
+			'html' => "This is a test of the <a href=\"http://www.google.com\">emergency broadcasting system</a>.",
+			'plainmode' => true,
+		),
+		Array(
 			'descr' => "Unquoted [url=http:...] with parameters gets converted.",
 			'bbcode' => "This is a test of the [url=http://www.google.com?q=broadcasting&y=foo&x=bar]emergency broadcasting system[/url].",
 			'html' => "This is a test of the <a href=\"http://www.google.com?q=broadcasting&amp;y=foo&amp;x=bar\" class=\"bbcode_url\">emergency broadcasting system</a>.",
@@ -594,6 +600,12 @@ h1 { text-align: center; }
 			'descr' => "The [url]http://...[/url] form works correctly.",
 			'bbcode' => "The [url]http://www.google.com[/url] form works correctly.",
 			'html' => "The <a href=\"http://www.google.com\" class=\"bbcode_url\">http://www.google.com</a> form works correctly.",
+		),
+		Array(
+			'descr' => "The [url]http://...[/url] form works correctly in plain mode.",
+			'bbcode' => "The [url]http://www.google.com[/url] form works correctly.",
+			'html' => "The <a href=\"http://www.google.com\">http://www.google.com</a> form works correctly.",
+			'plainmode' => true,
 		),
 		Array(
 			'descr' => "[url=\"...=...\"] contains an embedded equal sign (quotes work correctly).",
@@ -1010,6 +1022,9 @@ h1 { text-align: center; }
 			if (is_string(@$test['urlforcetarget']))
 				$bbcode->SetURLTarget($test['urlforcetarget']);
 			else $bbcode->SetURLTarget(false);
+			if (isset($test['plainmode']))
+				$bbcode->SetPlainMode($test['plainmode']);
+			else $bbcode->SetPlainMode(false);
 			if (@$test['tag_marker'] == '<') {
 				$bbcode->SetTagMarker('<');
 				$bbcode->SetAllowAmpersand(true);
