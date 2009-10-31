@@ -277,10 +277,12 @@
 						// See if this is a comment; if so, skip it.
 						if (preg_match($this->pat_comment, $this->text)) {
 							// This is a comment, not a tag, so treat it like it doesn't exist.
+							$this->state = BBCODE_LEXSTATE_TEXT;
 							continue;
 						}
 						if (preg_match($this->pat_comment2, $this->text)) {
 							// This is a comment, not a tag, so treat it like it doesn't exist.
+							$this->state = BBCODE_LEXSTATE_TEXT;
 							continue;
 						}
 						
