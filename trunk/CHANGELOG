@@ -2,6 +2,11 @@
 2009-10-31 / non-released / Phantom Inker (inker2576@yahoo.com)
 	* Fixed a bug in SetWikiURL that referenced an invalid function
 		parameter.
+	* Fixed a bug in the lexer that was causing comments to produce
+		an invalid following state (and thus causing comments to
+		effectively turn off tag parsing thereafter!).
+	* Added tests for the comment bug, and for a reported (but not
+		yet reproduced) quote bug.
 
 2009-10-10 / v1.4.3 / Phantom Inker (inker2576@yahoo.com)
 	* Fixed a bug in plain mode that was causing tags processed in

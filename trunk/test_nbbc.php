@@ -270,6 +270,12 @@ h1 { text-align: center; }
 			'html' => "This is a test of the  and other --] stuff.",
 		),
 		Array(
+			'descr' => "[!-- --] does not break any following tags outside it.",
+			'bbcode' => "The [!-- quick brown --]fox jumps over the [b]lazy[/b] [i]dog[/i].",
+			'html' => "The fox jumps over the <b>lazy</b> <i>dog</i>.",
+			'debug' => true,
+		),
+		Array(
 			'descr' => "The [[wiki]] special tag produces a wiki link.",
 			'bbcode' => "This is a test of the [[wiki]] tag.",
 			'html' => "This is a test of the <a href=\"/?page=wiki\" class=\"bbcode_wiki\">wiki</a> tag.",
@@ -814,6 +820,53 @@ h1 { text-align: center; }
 				. "Also outside the quote.",
 		),
 		Array(
+			'descr' => "Multiple nested [quote]...[/quote] tags should produce nested quotes.",
+			'bbcode' => "text0\n[quote]\n[quote]\n[quote]text1[/quote]\ntext2[/quote]\ntext3[/quote]\ntext4",
+			'html' => "text0"
+				. "\n<div class=\"bbcode_quote\">\n"
+				. "<div class=\"bbcode_quote_head\">Quote:</div>\n"
+				. "<div class=\"bbcode_quote_body\">"
+				. "\n<div class=\"bbcode_quote\">\n"
+				. "<div class=\"bbcode_quote_head\">Quote:</div>\n"
+				. "<div class=\"bbcode_quote_body\">"
+				. "\n<div class=\"bbcode_quote\">\n"
+				. "<div class=\"bbcode_quote_head\">Quote:</div>\n"
+				. "<div class=\"bbcode_quote_body\">"
+				. "text1"
+				. "</div>\n"
+				. "</div>\n"
+				. "text2"
+				. "</div>\n"
+				. "</div>\n"
+				. "text3"
+				. "</div>\n"
+				. "</div>\n"
+				. "text4",
+		),
+		Array(
+			'descr' => "Multiple nested [quote]...[/quote] tags should produce nested quotes.",
+			'bbcode' => "[quote]\n[quote]\n[quote]text1[/quote]\ntext2[/quote]\ntext3[/quote]\ntext4 :) text5 :o text6 :o",
+			'html' => "\n<div class=\"bbcode_quote\">\n"
+				. "<div class=\"bbcode_quote_head\">Quote:</div>\n"
+				. "<div class=\"bbcode_quote_body\">"
+				. "\n<div class=\"bbcode_quote\">\n"
+				. "<div class=\"bbcode_quote_head\">Quote:</div>\n"
+				. "<div class=\"bbcode_quote_body\">"
+				. "\n<div class=\"bbcode_quote\">\n"
+				. "<div class=\"bbcode_quote_head\">Quote:</div>\n"
+				. "<div class=\"bbcode_quote_body\">"
+				. "text1"
+				. "</div>\n"
+				. "</div>\n"
+				. "text2"
+				. "</div>\n"
+				. "</div>\n"
+				. "text3"
+				. "</div>\n"
+				. "</div>\n"
+				. "text4 <img src=\"smileys/smile.gif\" width=\"16\" height=\"16\" alt=\":)\" title=\":)\" class=\"bbcode_smiley\" /> text5 :o text6 :o",
+		),
+		Array(
 			'descr' => "[quote=John]...[/quote] should produce a quote from John.",
 			'bbcode' => "Outside the quote."
 				. "[quote=John]A [b]and[/b] & <woo>!\n\tAnd a [hey] and a [/nonny] and a ho ho ho![/quote]"
@@ -1066,11 +1119,11 @@ h1 { text-align: center; }
 					. "<tt style='white-space:pre-wrap;background-color:#FDB;'>"
 						. htmlspecialchars(addcslashes($test['bbcode'], "\x00..\x09\x0B..\x1F\\\x7F..\xFF"))
 						. "</tt><br /><br />\n"
-					. "<b>Expected:</b><br />\n"
+					. "<b>Expected:</b> (length " . strlen($pattern) . ")<br />\n"
 					. "<tt style='white-space:pre-wrap;background-color:#FDB;'>"
 						. htmlspecialchars(addcslashes($pattern, "\x00..\x09\x0B..\x1F\\\x7F..\xFF"))
 						. "</tt><br /><br />\n"
-					. "<b>Got:</b><br />\n"
+					. "<b>Got:</b> (length " . strlen($result) . ")<br />\n"
 					. "<tt style='white-space:pre-wrap;background-color:#FDB;'>"
 						. htmlspecialchars(addcslashes($result, "\x00..\x09\x0B..\x1F\\\x7F..\xFF"))
 						. "</tt>\n"

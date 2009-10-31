@@ -199,9 +199,11 @@ case 60:
 case 91:
 case 123:
 if (preg_match($this->pat_comment, $this->text)) {
+$this->state = BBCODE_LEXSTATE_TEXT;
 continue;
 }
 if (preg_match($this->pat_comment2, $this->text)) {
+$this->state = BBCODE_LEXSTATE_TEXT;
 continue;
 }
 if (preg_match($this->pat_wiki, $this->text, $matches)) {
