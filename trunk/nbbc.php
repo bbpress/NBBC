@@ -1058,7 +1058,7 @@ AddRule($name, $this->defaults->default_tag_rules[$name]);
 else RemoveRule($name); }
 function GetDefaultRules() { return $this->defaults->default_tag_rules; }
 function SetDefaultRules() { $this->tag_rules = $this->defaults->default_tag_rules; }
-function SetWikiURL($url) { $this->wiki_url = $func; }
+function SetWikiURL($url) { $this->wiki_url = $url; }
 function GetWikiURL($url) { return $this->wiki_url; }
 function GetDefaultWikiURL() { return '/?page='; }
 function SetLocalImgDir($path) { $this->local_img_dir = $path; }
