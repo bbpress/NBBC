@@ -225,7 +225,7 @@
 		// Handling for [[wiki]] and [[wiki|Wiki]] links and other replaced items.
 		// These are basically getter/setter functions that exist for convenience.
 		
-		function SetWikiURL($url)      { $this->wiki_url = $func; }
+		function SetWikiURL($url)      { $this->wiki_url = $url; }
 		function GetWikiURL($url)      { return $this->wiki_url; }
 		function GetDefaultWikiURL()   { return '/?page='; }
 		

@@ -1,4 +1,8 @@
 
+2009-10-31 / non-released / Phantom Inker (inker2576@yahoo.com)
+	* Fixed a bug in SetWikiURL that referenced an invalid function
+		parameter.
+
 2009-10-10 / v1.4.3 / Phantom Inker (inker2576@yahoo.com)
 	* Fixed a bug in plain mode that was causing tags processed in
 		plain mode to throw errors (it was calling a function that
