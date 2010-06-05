@@ -1561,11 +1561,11 @@
 			// start tag as broken.
 			$state = $this->lexer->SaveState();
 			
-			$end_tag = "{$this->lexer->tagmarker}/$tag_name{$this->lexer->end_tagmarker}";
+			$end_tag = $this->lexer->tagmarker . "/" . $tag_name . $this->lexer->end_tagmarker;
 
 			if ($this->debug) {
 				print "<b>Internal_ProcessVerbatimTag:</b> tag <tt>[" . htmlspecialchars($tag_name)
-					. "]</tt> uses verbatim content: searching for {$end_tag}...<br />\n";
+					. "]</tt> uses verbatim content: searching for $end_tag...<br />\n";
 			}
 
 			// Push tokens until we find a matching end tag or end-of-input.
