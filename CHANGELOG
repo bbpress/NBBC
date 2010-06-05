@@ -1,4 +1,16 @@
 
+2010-06-05 / released / Phantom Inker (inker2576@yahoo.com)
+	* Fixed the long-standing bug in verbatim parsing so that
+		interior content is now truly verbatim and unprocessed.
+		This allows source code to be correctly represented inside
+		a [code] block even if it contains things like ['foo'].
+	* Fixed typos (missing $this-> and wrong variable names) in
+		SetDefaultRule() and SetWikiURL() that caused them to
+		reference things that didn't exist.
+	* Fixed a typo (missing backslash) in IsValidURL() that caused
+		it to miss some legal URLs.
+	* Fixed a bug that was incorrectly generating lists in some cases.
+
 2009-10-31 / non-released / Phantom Inker (inker2576@yahoo.com)
 	* Fixed a bug in SetWikiURL that referenced an invalid function
 		parameter.

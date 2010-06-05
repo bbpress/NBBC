@@ -216,8 +216,8 @@
 		function GetDefaultRule($name) { return isset($this->defaults->default_tag_rules[$name])
 		                                   ? $this->defaults->default_tag_rules[$name] : false; }
 		function SetDefaultRule($name) { if (isset($this->defaults->default_tag_rules[$name]))
-		                                    AddRule($name, $this->defaults->default_tag_rules[$name]);
-		                                 else RemoveRule($name); }
+		                                    $this->AddRule($name, $this->defaults->default_tag_rules[$name]);
+		                                 else $this->RemoveRule($name); }
 		function GetDefaultRules()     { return $this->defaults->default_tag_rules; }
 		function SetDefaultRules()     { $this->tag_rules = $this->defaults->default_tag_rules; }
 
@@ -327,7 +327,7 @@
 			if (preg_match("/^
 				(?:https?|ftp):\\/\\/
 				(?:
-					(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+
+					(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+
 					[a-zA-Z0-9]
 					(?:[a-zA-Z0-9-]*[a-zA-Z0-9])?
 				|
@@ -1561,16 +1561,18 @@
 			// start tag as broken.
 			$state = $this->lexer->SaveState();
 			
+			$end_tag = "{$this->lexer->tagmarker}/$tag_name{$this->lexer->end_tagmarker}";
+
 			if ($this->debug) {
 				print "<b>Internal_ProcessVerbatimTag:</b> tag <tt>[" . htmlspecialchars($tag_name)
-					. "]</tt> uses verbatim content: searching for end tag...<br />\n";
+					. "]</tt> uses verbatim content: searching for {$end_tag}...<br />\n";
 			}
 
 			// Push tokens until we find a matching end tag or end-of-input.
 			$start = count($this->stack);
+			$this->lexer->verbatim = true;
 			while (($token_type = $this->lexer->NextToken()) != BBCODE_EOI) {
-				if ($token_type == BBCODE_ENDTAG
-					&& @$this->lexer->tag['_name'] == $tag_name) {
+				if ($this->lexer->text == $end_tag) {
 					// Found the end tag, so we're done.
 					$end_tag_params = $this->lexer->tag;
 					break;
@@ -1607,6 +1609,7 @@
 					BBCODE_STACK_CLASS => $this->current_class,
 				);
 			}
+			$this->lexer->verbatim = false;
 			
 			// We've collected a bunch of text for this tag.  Now, make sure it ended on
 			// a valid end tag.
