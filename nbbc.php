@@ -30,8 +30,8 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-define("BBCODE_VERSION", "1.4.3");
-define("BBCODE_RELEASE", "2009-10-10");
+define("BBCODE_VERSION", "1.4.4");
+define("BBCODE_RELEASE", "2010-06-05");
 define("BBCODE_VERBATIM", 2);
 define("BBCODE_REQUIRED", 1);
 define("BBCODE_OPTIONAL", 0);
@@ -1771,8 +1771,7 @@ BBCODE_STACK_CLASS => $this->current_class,
 }
 function Internal_ProcessVerbatimTag($tag_name, $tag_params, $tag_rule) {
 $state = $this->lexer->SaveState();
-$end_tag = "{$this->lexer->tagmarker}/$tag_name{$this->lexer->end_tagmarker}";
-}
+$end_tag = $this->lexer->tagmarker . "/" . $tag_name . $this->lexer->end_tagmarker;
 $start = count($this->stack);
 $this->lexer->verbatim = true;
 while (($token_type = $this->lexer->NextToken()) != BBCODE_EOI) {
