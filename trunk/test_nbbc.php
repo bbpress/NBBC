@@ -273,47 +273,6 @@ h1 { text-align: center; }
 			'descr' => "[!-- --] does not break any following tags outside it.",
 			'bbcode' => "The [!-- quick brown --]fox jumps over the [b]lazy[/b] [i]dog[/i].",
 			'html' => "The fox jumps over the <b>lazy</b> <i>dog</i>.",
-			'debug' => true,
-		),
-		Array(
-			'descr' => "The [[wiki]] special tag produces a wiki link.",
-			'bbcode' => "This is a test of the [[wiki]] tag.",
-			'html' => "This is a test of the <a href=\"/?page=wiki\" class=\"bbcode_wiki\">wiki</a> tag.",
-		),
-		Array(
-			'descr' => "The [[wiki]] special tag does not convert [a-zA-Z0-9'\".:_-].",
-			'bbcode' => "This is a test of the [[\"Ab1cd'Ef2gh_Ij3kl.,Mn4op:Qr9st-Uv0wx\"]] tag.",
-			'html' => "This is a test of the <a href=\"/?page=%22Ab1cd%27Ef2gh_Ij3kl.%2CMn4op%3AQr9st_Uv0wx%22\" class=\"bbcode_wiki\">&quot;Ab1cd'Ef2gh_Ij3kl.,Mn4op:Qr9st-Uv0wx&quot;</a> tag.",
-		),
-		Array(
-			'descr' => "The [[wiki]] special tag can contain spaces.",
-			'bbcode' => "This is a test of the [[northwestern salmon]].",
-			'html' => "This is a test of the <a href=\"/?page=northwestern_salmon\" class=\"bbcode_wiki\">northwestern salmon</a>.",
-		),
-		Array(
-			'descr' => "The [[wiki]] special tag cannot contain newlines.",
-			'bbcode' => "This is a test of the [[northwestern\nsalmon]].",
-			'html' => "This is a test of the [[northwestern<br />\nsalmon]].",
-		),
-		Array(
-			'descr' => "The [[wiki]] special tag can contain a title after a | character.",
-			'bbcode' => "This is a test of the [[northwestern salmon|Northwestern salmon are yummy!]].",
-			'html' => "This is a test of the <a href=\"/?page=northwestern_salmon\" class=\"bbcode_wiki\">Northwestern salmon are yummy!</a>.",
-		),
-		Array(
-			'descr' => "The [[wiki]] special tag doesn't damage anything outside it.",
-			'bbcode' => "I really loved reading [[arc 1|the first story arc]] because it was more entertaining than [[arc 2|the second story arc]] was.",
-			'html' => "I really loved reading <a href=\"/?page=arc_1\" class=\"bbcode_wiki\">the first story arc</a> because it was more entertaining than <a href=\"/?page=arc_2\" class=\"bbcode_wiki\">the second story arc</a> was.",
-		),
-		Array(
-			'descr' => "The [[wiki]] special tag condenses and trims internal whitespace.",
-			'bbcode' => "This is a test of the [[  northwestern \t salmon   |   Northwestern   salmon are   yummy!  ]].",
-			'html' => "This is a test of the <a href=\"/?page=northwestern_salmon\" class=\"bbcode_wiki\">Northwestern   salmon are   yummy!</a>.",
-		),
-		Array(
-			'descr' => "[url=(includes a smiley)] is not converted into a smiley.",
-			'bbcode' => "This is a test of the [url=http://www.google.com/foo:-P]emergency broadcasting system[/url].",
-			'html' => "This is a test of the <a href=\"http://www.google.com/foo:-P\" class=\"bbcode_url\">emergency broadcasting system</a>.",
 		),
 		Array(
 			'descr' => "Tag marker mode '<' works correctly.",
@@ -338,66 +297,6 @@ h1 { text-align: center; }
 			'bbcode' => "This is <b>a <i>test</b></i> &amp; some junk.",
 			'html' => "This is <b>a <i>test</i></b> &amp; some junk.",
 			'tag_marker' => '<',
-		),
-		Array(
-			'descr' => "Embedded URLs get detected and converted.",
-			'bbcode' => "Go to http://www.google.com for your search needs!",
-			'html' => "Go to <a href=\"http://www.google.com/\">http://www.google.com</a> for your search needs!",
-			'detect_urls' => true,
-		),
-		Array(
-			'descr' => "Embedded HTTPS URLs get detected and converted.",
-			'bbcode' => "Go to https://www.google.com for your search needs!",
-			'html' => "Go to <a href=\"https://www.google.com/\">https://www.google.com</a> for your search needs!",
-			'detect_urls' => true,
-		),
-		Array(
-			'descr' => "Embedded FTP URLs get detected and converted.",
-			'bbcode' => "Go to ftp://www.google.com for your search needs!",
-			'html' => "Go to <a href=\"ftp://www.google.com/\">ftp://www.google.com</a> for your search needs!",
-			'detect_urls' => true,
-		),
-		Array(
-			'descr' => "Embedded Javascript URLs are properly ignored.",
-			'bbcode' => "Go to javascript:foo.com;alert(); for your search needs!",
-			'html' => "Go to javascript:<a href=\"http://foo.com/\">foo.com</a>;alert(); for your search needs!",
-			'detect_urls' => true,
-		),
-		Array(
-			'descr' => "Embedded domain names get detected and converted.",
-			'bbcode' => "Go to www.google.com for your search needs!",
-			'html' => "Go to <a href=\"http://www.google.com/\">www.google.com</a> for your search needs!",
-			'detect_urls' => true,
-		),
-		Array(
-			'descr' => "Embedded IPs get detected and converted.",
-			'bbcode' => "Go to 127.0.0.1:667/flarb for your own computer!",
-			'html' => "Go to <a href=\"http://127.0.0.1:667/flarb\">127.0.0.1:667/flarb</a> for your own computer!",
-			'detect_urls' => true,
-		),
-		Array(
-			'descr' => "Embedded addresses are smart about being inside parentheses.",
-			'bbcode' => "I love Google! (google.com)",
-			'html' => "I love Google! (<a href=\"http://google.com/\">google.com</a>)",
-			'detect_urls' => true,
-		),
-		Array(
-			'descr' => "Embedded-URL detector disallows junk that only seems like a URL.",
-			'bbcode' => "I browse alt.net.screw-you:80/flarb all the time.",
-			'html' => "I browse alt.net.screw-you:80/flarb all the time.",
-			'detect_urls' => true,
-		),
-		Array(
-			'descr' => "Embedded-URL detector also detects e-mail addresses.",
-			'bbcode' => "Send complaints to complaints@whitehouse.gov .",
-			'html' => "Send complaints to <a href=\"mailto:complaints@whitehouse.gov\">complaints@whitehouse.gov</a> .",
-			'detect_urls' => true,
-		),
-		Array(
-			'descr' => "Embedded-URL detector takes precedence over the smiley detector.",
-			'bbcode' => "This is a good dictionary:  http://www.amazon.com/Oxford-Dictionary-American-Usage-Style/dp/0195135083/ref=pd_bbs_sr_1?ie=UTF8&s=books&qid=1217890161&sr=8-1&x=p",
-			'html' => "This is a good dictionary:  <a href=\"http://www.amazon.com/Oxford-Dictionary-American-Usage-Style/dp/0195135083/ref=pd_bbs_sr_1?ie=UTF8&amp;s=books&amp;qid=1217890161&amp;sr=8-1&amp;x=p\">http://www.amazon.com/Oxford-Dictionary-American-Usage-Style/dp/0195135083/ref=pd_bbs_sr_1?ie=UTF8&amp;s=books&amp;qid=1217890161&amp;sr=8-1&amp;x=p</a>",
-			'detect_urls' => true,
 		),
 
 		//-----------------------------------------------------------------------------------------
@@ -557,6 +456,20 @@ h1 { text-align: center; }
 			'html' => "This is a test of the [color=*#\$]emergency broadcasting system[/color].",
 		),
 		Array(
+			'descr' => "[spoiler] gets converted.",
+			'bbcode' => "Ssh, don't tell, but [spoiler]Darth is Luke's father[/spoiler]!",
+			'html' => "Ssh, don't tell, but <span class=\"bbcode_spoiler\">Darth is Luke's father</span>!",
+		),
+		Array(
+			'descr' => "[acronym] gets converted.",
+			'bbcode' => "The [acronym=\"British Broadcasting Company\"]BBC[/acronym] airs [i]Doctor Who[/i] on Saturdays.",
+			'html' => "The <span class=\"bbcode_acronym\" title=\"British Broadcasting Company\">BBC</span> airs <i>Doctor Who</i> on Saturdays.",
+		),
+
+		//-----------------------------------------------------------------------------------------
+
+		"URL Tests",
+		Array(
 			'descr' => "[url=...] (with no protocol given) gets converted.",
 			'bbcode' => "This is a test of the [url=fleeb.html]emergency broadcasting system[/url].",
 			'html' => "This is a test of the <a href=\"fleeb.html\" class=\"bbcode_url\">emergency broadcasting system</a>.",
@@ -614,6 +527,11 @@ h1 { text-align: center; }
 			'plainmode' => true,
 		),
 		Array(
+			'descr' => "The [url]malformed...url...[/url] form is fully unprocessed.",
+			'bbcode' => "The [url]a.imagehost.org/view/egdgdo[/url] form is fully unprocessed.",
+			'html' => "The <a href=\"a.imagehost.org/view/egdgdo\" class=\"bbcode_url\">a.imagehost.org/view/egdgdo</a> form is fully unprocessed.",
+		),
+		Array(
 			'descr' => "[url=\"...=...\"] contains an embedded equal sign (quotes work correctly).",
 			'bbcode' => "The [url=\"http://www.google.com/?foo=bar&baz=frob\" bar=foo]link[/url] works correctly.",
 			'html' => "The <a href=\"http://www.google.com/?foo=bar&amp;baz=frob\" class=\"bbcode_url\">link</a> works correctly.",
@@ -661,6 +579,79 @@ h1 { text-align: center; }
 			'urltarget' => 'override',
 		),
 		Array(
+			'descr' => "[url=(includes a smiley)] is not converted into a smiley.",
+			'bbcode' => "This is a test of the [url=http://www.google.com/foo:-P]emergency broadcasting system[/url].",
+			'html' => "This is a test of the <a href=\"http://www.google.com/foo:-P\" class=\"bbcode_url\">emergency broadcasting system</a>.",
+		),
+
+		//-----------------------------------------------------------------------------------------
+
+		"Embedded URL Tests",
+		Array(
+			'descr' => "Embedded URLs get detected and converted.",
+			'bbcode' => "Go to http://www.google.com for your search needs!",
+			'html' => "Go to <a href=\"http://www.google.com/\">http://www.google.com</a> for your search needs!",
+			'detect_urls' => true,
+		),
+		Array(
+			'descr' => "Embedded HTTPS URLs get detected and converted.",
+			'bbcode' => "Go to https://www.google.com for your search needs!",
+			'html' => "Go to <a href=\"https://www.google.com/\">https://www.google.com</a> for your search needs!",
+			'detect_urls' => true,
+		),
+		Array(
+			'descr' => "Embedded FTP URLs get detected and converted.",
+			'bbcode' => "Go to ftp://www.google.com for your search needs!",
+			'html' => "Go to <a href=\"ftp://www.google.com/\">ftp://www.google.com</a> for your search needs!",
+			'detect_urls' => true,
+		),
+		Array(
+			'descr' => "Embedded Javascript URLs are properly ignored.",
+			'bbcode' => "Go to javascript:foo.com;alert(); for your search needs!",
+			'html' => "Go to javascript:<a href=\"http://foo.com/\">foo.com</a>;alert(); for your search needs!",
+			'detect_urls' => true,
+		),
+		Array(
+			'descr' => "Embedded domain names get detected and converted.",
+			'bbcode' => "Go to www.google.com for your search needs!",
+			'html' => "Go to <a href=\"http://www.google.com/\">www.google.com</a> for your search needs!",
+			'detect_urls' => true,
+		),
+		Array(
+			'descr' => "Embedded IPs get detected and converted.",
+			'bbcode' => "Go to 127.0.0.1:667/flarb for your own computer!",
+			'html' => "Go to <a href=\"http://127.0.0.1:667/flarb\">127.0.0.1:667/flarb</a> for your own computer!",
+			'detect_urls' => true,
+		),
+		Array(
+			'descr' => "Embedded addresses are smart about being inside parentheses.",
+			'bbcode' => "I love Google! (google.com)",
+			'html' => "I love Google! (<a href=\"http://google.com/\">google.com</a>)",
+			'detect_urls' => true,
+		),
+		Array(
+			'descr' => "Embedded-URL detector disallows junk that only seems like a URL.",
+			'bbcode' => "I browse alt.net.screw-you:80/flarb all the time.",
+			'html' => "I browse alt.net.screw-you:80/flarb all the time.",
+			'detect_urls' => true,
+		),
+		Array(
+			'descr' => "Embedded-URL detector also detects e-mail addresses.",
+			'bbcode' => "Send complaints to complaints@whitehouse.gov .",
+			'html' => "Send complaints to <a href=\"mailto:complaints@whitehouse.gov\">complaints@whitehouse.gov</a> .",
+			'detect_urls' => true,
+		),
+		Array(
+			'descr' => "Embedded-URL detector takes precedence over the smiley detector.",
+			'bbcode' => "This is a good dictionary:  http://www.amazon.com/Oxford-Dictionary-American-Usage-Style/dp/0195135083/ref=pd_bbs_sr_1?ie=UTF8&s=books&qid=1217890161&sr=8-1&x=p",
+			'html' => "This is a good dictionary:  <a href=\"http://www.amazon.com/Oxford-Dictionary-American-Usage-Style/dp/0195135083/ref=pd_bbs_sr_1?ie=UTF8&amp;s=books&amp;qid=1217890161&amp;sr=8-1&amp;x=p\">http://www.amazon.com/Oxford-Dictionary-American-Usage-Style/dp/0195135083/ref=pd_bbs_sr_1?ie=UTF8&amp;s=books&amp;qid=1217890161&amp;sr=8-1&amp;x=p</a>",
+			'detect_urls' => true,
+		),
+
+		//-----------------------------------------------------------------------------------------
+
+		"Special URL-Like-Tag Tests",
+		Array(
 			'descr' => "[email] gets converted.",
 			'bbcode' => "Send complaints to [email]john@example.com[/email].",
 			'html' => "Send complaints to <a href=\"mailto:john@example.com\" class=\"bbcode_email\">john@example.com</a>.",
@@ -676,24 +667,44 @@ h1 { text-align: center; }
 			'html' => "Send complaints to [email]jo&quot;hn@@@exa:mple.com[/email].",
 		),
 		Array(
-			'descr' => "[spoiler] gets converted.",
-			'bbcode' => "Ssh, don't tell, but [spoiler]Darth is Luke's father[/spoiler]!",
-			'html' => "Ssh, don't tell, but <span class=\"bbcode_spoiler\">Darth is Luke's father</span>!",
+			'descr' => "The [[wiki]] special tag produces a wiki link.",
+			'bbcode' => "This is a test of the [[wiki]] tag.",
+			'html' => "This is a test of the <a href=\"/?page=wiki\" class=\"bbcode_wiki\">wiki</a> tag.",
 		),
 		Array(
-			'descr' => "[acronym] gets converted.",
-			'bbcode' => "The [acronym=\"British Broadcasting Company\"]BBC[/acronym] airs [i]Doctor Who[/i] on Saturdays.",
-			'html' => "The <span class=\"bbcode_acronym\" title=\"British Broadcasting Company\">BBC</span> airs <i>Doctor Who</i> on Saturdays.",
+			'descr' => "The [[wiki]] special tag does not convert [a-zA-Z0-9'\".:_-].",
+			'bbcode' => "This is a test of the [[\"Ab1cd'Ef2gh_Ij3kl.,Mn4op:Qr9st-Uv0wx\"]] tag.",
+			'html' => "This is a test of the <a href=\"/?page=%22Ab1cd%27Ef2gh_Ij3kl.%2CMn4op%3AQr9st_Uv0wx%22\" class=\"bbcode_wiki\">&quot;Ab1cd'Ef2gh_Ij3kl.,Mn4op:Qr9st-Uv0wx&quot;</a> tag.",
+		),
+		Array(
+			'descr' => "The [[wiki]] special tag can contain spaces.",
+			'bbcode' => "This is a test of the [[northwestern salmon]].",
+			'html' => "This is a test of the <a href=\"/?page=northwestern_salmon\" class=\"bbcode_wiki\">northwestern salmon</a>.",
+		),
+		Array(
+			'descr' => "The [[wiki]] special tag cannot contain newlines.",
+			'bbcode' => "This is a test of the [[northwestern\nsalmon]].",
+			'html' => "This is a test of the [[northwestern<br />\nsalmon]].",
+		),
+		Array(
+			'descr' => "The [[wiki]] special tag can contain a title after a | character.",
+			'bbcode' => "This is a test of the [[northwestern salmon|Northwestern salmon are yummy!]].",
+			'html' => "This is a test of the <a href=\"/?page=northwestern_salmon\" class=\"bbcode_wiki\">Northwestern salmon are yummy!</a>.",
+		),
+		Array(
+			'descr' => "The [[wiki]] special tag doesn't damage anything outside it.",
+			'bbcode' => "I really loved reading [[arc 1|the first story arc]] because it was more entertaining than [[arc 2|the second story arc]] was.",
+			'html' => "I really loved reading <a href=\"/?page=arc_1\" class=\"bbcode_wiki\">the first story arc</a> because it was more entertaining than <a href=\"/?page=arc_2\" class=\"bbcode_wiki\">the second story arc</a> was.",
+		),
+		Array(
+			'descr' => "The [[wiki]] special tag condenses and trims internal whitespace.",
+			'bbcode' => "This is a test of the [[  northwestern \t salmon   |   Northwestern   salmon are   yummy!  ]].",
+			'html' => "This is a test of the <a href=\"/?page=northwestern_salmon\" class=\"bbcode_wiki\">Northwestern   salmon are   yummy!</a>.",
 		),
 
 		//-----------------------------------------------------------------------------------------
 
-		"Replaced Tag Conversion Tests",
-		Array(
-			'descr' => "[rule] produces a horizontal rule.",
-			'bbcode' => "This is a test of the [rule] emergency broadcasting system.",
-			'html' => "This is a test of the\n<hr class=\"bbcode_rule\" />\nemergency broadcasting system.",
-		),
+		"Images and Replaced-Tag Conversion Tests",
 		Array(
 			'descr' => "[img] produces an image.",
 			'bbcode' => "This is Google's logo: [img]http://www.google.com/intl/en_ALL/images/logo.gif[/img].",
@@ -733,6 +744,11 @@ h1 { text-align: center; }
 			'descr' => "[img] will skip nonexistent local images.",
 			'bbcode' => "This is a smiley: [img]flarb.gif[/img].",
 			'html' => "This is a smiley: [img]flarb.gif[/img].",
+		),
+		Array(
+			'descr' => "[rule] produces a horizontal rule.",
+			'bbcode' => "This is a test of the [rule] emergency broadcasting system.",
+			'html' => "This is a test of the\n<hr class=\"bbcode_rule\" />\nemergency broadcasting system.",
 		),
 		Array(
 			'descr' => "[br] is equivalent to a newline.",
@@ -782,15 +798,31 @@ h1 { text-align: center; }
 		Array(
 			'descr' => "[code]...[/code] should reproduce its contents exactly as they're given.",
 			'bbcode' => "Not code."
-				. "[code]A [b]and[/b] & <woo>!\n\tAnd a [hey] and a [/nonny] and a ho ho ho![/code]"
+				. "[code]A [b]and[/b] & <woo>!\n\tAnd a ['hey'] and a [/nonny] and a ho ho ho![/code]"
 				. "Also not code.",
 			'html' => "Not code."
 				. "\n<div class=\"bbcode_code\">\n"
 				. "<div class=\"bbcode_code_head\">Code:</div>\n"
 				. "<div class=\"bbcode_code_body\" style=\"white-space:pre\">A [b]and[/b] &amp; &lt;woo&gt;!\n"
-					. "\tAnd a [hey] and a [/nonny] and a ho ho ho!</div>\n"
+					. "\tAnd a ['hey'] and a [/nonny] and a ho ho ho!</div>\n"
 				. "</div>\n"
 				. "Also not code.",
+		),
+		Array(
+			'descr' => "[code]...[/code] should reproduce PHP source code undamaged.",
+			'bbcode' => "Not code.\n"
+				. "[code]\n"
+				. "\$foo['bar'] = 42;\n"
+				. "if (\$foo[\"bar\"] < 42) \$foo[] = 0;\n"
+				. "[/code]\n"
+				. "Also not code.\n",
+			'html' => "Not code."
+				. "\n<div class=\"bbcode_code\">\n"
+				. "<div class=\"bbcode_code_head\">Code:</div>\n"
+				. "<div class=\"bbcode_code_body\" style=\"white-space:pre\">\$foo['bar'] = 42;\n"
+					. "if (\$foo[&quot;bar&quot;] &lt; 42) \$foo[] = 0;</div>\n"
+				. "</div>\n"
+				. "Also not code.<br />\n",
 		),
 		Array(
 			'descr' => "<code>...</code> should not misbehave in '<' tag marker mode.",

@@ -412,6 +412,8 @@
 
 			$url = is_string($default) ? $default : $bbcode->UnHTMLEncode(strip_tags($content));
 			if ($bbcode->IsValidURL($url)) {
+				if ($bbcode->debug)
+					print "ISVALIDURL<br />";
 				if ($bbcode->url_targetable !== false && isset($params['target']))
 					$target = " target=\"" . htmlspecialchars($params['target']) . "\"";
 				else $target = "";

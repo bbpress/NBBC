@@ -65,6 +65,7 @@
 		var $debug;			// In debug mode, we dump decoded tags when we find them.
 
 		var $tagmarker;		// Which kind of tag marker we're using:  "[", "<", "(", or "{"
+		var $end_tagmarker;	// The ending tag marker:  "]", ">", "(", or "{"
 		var $pat_main;		// Main tag-matching pattern.
 		var $pat_comment;	// Pattern for matching comments.
 		var $pat_comment2;	// Pattern for matching comments.
@@ -78,12 +79,14 @@
 			// We also separate out whitespace and newlines.
 			
 			// Choose a tag marker based on the possible tag markers.
-			$beginmarkers = Array( '[' => '\[', '<' => '<', '{' => '\{', '(' => '\(' );
-			$endmarkers   = Array( '[' => '\]', '<' => '>', '{' => '\}', '(' => '\)' );
-			if (!isset($endmarkers[$tagmarker])) $tagmarker = '[';
-			$e = $endmarkers[$tagmarker];
-			$b = $beginmarkers[$tagmarker];
+			$regex_beginmarkers = Array( '[' => '\[', '<' => '<', '{' => '\{', '(' => '\(' );
+			$regex_endmarkers   = Array( '[' => '\]', '<' => '>', '{' => '\}', '(' => '\)' );
+			$endmarkers         = Array( '[' =>  ']', '<' => '>', '{' =>  '}', '(' =>  ')' );
+			if (!isset($regex_endmarkers[$tagmarker])) $tagmarker = '[';
+			$e = $regex_endmarkers[$tagmarker];
+			$b = $regex_beginmarkers[$tagmarker];
 			$this->tagmarker = $tagmarker;
+			$this->end_tagmarker = $endmarkers[$tagmarker];
 			
 			// $this->input will be an array of tokens, with the special property that
 			// the elements strictly alternate between plain text and tags/whitespace/newlines,
@@ -224,13 +227,39 @@
 					$this->input[$this->ptr++]);
 				
 				if ($this->verbatim) {
-					// In verbatim mode, we return *everything* as plain text.
+
+					// In verbatim mode, we return *everything* as plain text or whitespace.
 					$this->tag = false;
-					if ($this->state == BBCODE_LEXSTATE_TEXT)
+					if ($this->state == BBCODE_LEXSTATE_TEXT) {
 						$this->state = BBCODE_LEXSTATE_TAG;
-					else $this->state = BBCODE_LEXSTATE_TEXT;
+						$token_type = BBCODE_TEXT;
+					}
+					else {
+						// This must be either whitespace, a newline, or a tag.
+						$this->state = BBCODE_LEXSTATE_TEXT;
+						switch (ord(substr($this->text, 0, 1))) {
+						case 10:
+						case 13:
+							// Newline.
+							$token_type = BBCODE_NL;
+							break;
+						default:
+							// Whitespace.
+							$token_type = BBCODE_WS;
+							break;
+						case 45:
+						case 40:
+						case 60:
+						case 91:
+						case 123:
+							// Tag or comment.
+							$token_type = BBCODE_TEXT;
+							break;
+						}
+					}
+
 					if (strlen($this->text) > 0)
-						return $this->token = BBCODE_TEXT;
+						return $this->token = $token_type;
 				}
 				else if ($this->state == BBCODE_LEXSTATE_TEXT) {
 					// Next up is plain text, but only return it if it's nonempty.
