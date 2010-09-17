@@ -293,11 +293,14 @@ EOI;
 		return true;
 	}
 
+	print "Creating the user manual...\n";
+
 	foreach ($Groups as $group_index => $group) {
 		$group_title = trim($group['title']);
 		if (substr($group_title, 0, 1) == '*')
 			$group_title = trim(substr($group_title, 1));
 		foreach ($group['sub'] as $section_index => $section) {
+			print "{$section['name']}.tpl\n";
 			$content = trim(file_get_contents("{$section['name']}.tpl"));
 			$group_id = RomanNumerals($group_index+1) . ".";
 			$section_id = chr($section_index + 65);

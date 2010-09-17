@@ -2,7 +2,7 @@
 <a name="intro"></a>
 <h1><img src='nbbc-small.png' width='206' height='56' alt='NBBC' /><br />The New BBCode Parser</h1>
 <p class='copyright'>Version {$BBCODE_VERSION}<br />
-Copyright &copy; 2008-9, the Phantom Inker.  All rights reserved.</p>
+Copyright &copy; 2008-10, the Phantom Inker.  All rights reserved.</p>
 
 <p>The New BBCode Parser (NBBC) is a fully-validating, high-speed, extensible parser
 for the BBCode document language, written in PHP, compatible with PHP 4.0.5+ and PHP 5.
