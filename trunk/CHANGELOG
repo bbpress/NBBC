@@ -1,4 +1,8 @@
 
+2010-09-17 / non-released / Phantom Inker (inker2576@yahoo.com)
+	* Fixed a minor bug that caused NBBC to fail a parse if all smileys
+		were removed while smiley processing was still enabled.
+
 2010-09-17 / v1.4.5 / Phantom Inker (inker2576@yahoo.com)
 	* SECURITY FIX:  Fixed a bug that would allow arbitrary HTML
 		injection via the standard [acronym] tag.

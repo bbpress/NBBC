@@ -466,20 +466,22 @@
 			global $BBCode_Profiler;
 			$BBCode_Profiler->Begin('ProcessSmileys:other');
 
-			if (!$this->enable_smileys || $this->plain_mode) {
+			$smileys_disabled = (!$this->enable_smileys || $this->plain_mode);
+
+			// If the smileys need to be precomputed, process them now.
+			if ($this->smiley_regex === false && !$smileys_disabled) {
+				$BBCode_Profiler->End('ProcessSmileys:other');
+				$BBCode_Profiler->Begin('ProcessSmileys:rebuild');
+				$this->Internal_RebuildSmileys();
+				$BBCode_Profiler->End('ProcessSmileys:rebuild');
+				$BBCode_Profiler->Begin('ProcessSmileys:other');
+			}
+
+			if ($this->smiley_regex === '*' || $smileys_disabled) {
 				// If smileys are turned off, don't convert them.
 				$output = $this->HTMLEncode($string);
 			}
 			else {
-				// If the smileys need to be computed, process them now.
-				if ($this->smiley_regex === false) {
-					$BBCode_Profiler->End('ProcessSmileys:other');
-					$BBCode_Profiler->Begin('ProcessSmileys:rebuild');
-					$this->Internal_RebuildSmileys();
-					$BBCode_Profiler->End('ProcessSmileys:rebuild');
-					$BBCode_Profiler->Begin('ProcessSmileys:other');
-				}
-	
 				// Split the string so that it consists of alternating pairs of smileys and non-smileys.
 				$BBCode_Profiler->End('ProcessSmileys:other');
 				$BBCode_Profiler->Begin('ProcessSmileys:split');
@@ -528,7 +530,9 @@
 			// Construct the $this->smiley_regex that can recognize all
 			// of the smileys.  This will save us a lot of computation time
 			// in $this->Parse() if multiple BBCode strings are being
-			// processed by the same script.
+			// processed by the same script.  If there are no smileys (for
+			// whatever reason), we just produce a '*' as the regex to
+			// indicate that.
 			$regex = Array("/(?<![\\w])(");
 			$first = true;
 			foreach ($this->smileys as $code => $filename) {
@@ -537,7 +541,8 @@
 				$first = false;
 			}
 			$regex[] = ")(?![\\w])/";
-			$this->smiley_regex = implode("", $regex);
+			if ($first) $this->smiley_regex = '*';
+			else $this->smiley_regex = implode("", $regex);
 
 			if ($this->debug)
 				print "<b>Internal_RebuildSmileys:</b> regex: <tt>" . htmlspecialchars($regex) . "</tt><br />\n";
