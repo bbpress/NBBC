@@ -1218,13 +1218,14 @@ $output = implode("", $output);
 return $output;
 }
 function Internal_ProcessSmileys($string) {
-if (!$this->enable_smileys || $this->plain_mode) {
+$smileys_disabled = (!$this->enable_smileys || $this->plain_mode);
+if ($this->smiley_regex === false && !$smileys_disabled) {
+$this->Internal_RebuildSmileys();
+}
+if ($this->smiley_regex === '*' || $smileys_disabled) {
 $output = $this->HTMLEncode($string);
 }
 else {
-if ($this->smiley_regex === false) {
-$this->Internal_RebuildSmileys();
-}
 $tokens = preg_split($this->smiley_regex, $string, -1, PREG_SPLIT_DELIM_CAPTURE);
 if (count($tokens) <= 1) {
 $output = $this->HTMLEncode($string);
@@ -1264,7 +1265,8 @@ $regex[] = preg_quote("$code", '/');
 $first = false;
 }
 $regex[] = ")(?![\\w])/";
-$this->smiley_regex = implode("", $regex);
+if ($first) $this->smiley_regex = '*';
+else $this->smiley_regex = implode("", $regex);
 }
 function Internal_AutoDetectURLs($string) {
 $output = preg_split("/( (?:
