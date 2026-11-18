@@ -92,7 +92,7 @@ $this->end_tagmarker = $endmarkers[$tagmarker];
 $this->pat_main = "/( "
 . "{$b}"
 . "(?! -- | ' | !-- | {$b}{$b} )"
-. "(?: [^\\n\\r{$b}{$e}] | \\\" [^\\\"\\n\\r]* \\\" | \\' [^\\'\\n\\r]* \\' )*+"
+. "(?: \\\" [^\\\"\\n\\r]* \\\" | \\' [^\\'\\n\\r]* \\' | [^\\n\\r{$b}{$e}] )*+"
 . "{$e}"
 . "| {$b}{$b} (?: [^{$e}\\r\\n] | {$e}[^{$e}\\r\\n] )* {$e}{$e}"
 . "| {$b} (?: -- | ' ) (?: [^{$e}\\n\\r]* ) {$e}"
@@ -1020,7 +1020,7 @@ var $debug;
 var $lexer;
 var $stack;
 private static $instance;
-private function __construct() {
+public function __construct() {
 $this->defaults = new BBCodeLibrary;
 $this->tag_rules = $this->defaults->default_tag_rules;
 $this->smileys = $this->defaults->default_smileys;
@@ -1800,6 +1800,7 @@ BBCODE_STACK_CLASS => $this->current_class,
 }
 function Internal_ProcessVerbatimTag($tag_name, $tag_params, $tag_rule) {
 $state = $this->lexer->SaveState();
+$text_length = $this->text_length;
 $end_tag = $this->lexer->tagmarker . "/" . $tag_name . $this->lexer->end_tagmarker;
 $start = count($this->stack);
 $this->lexer->verbatim = true;
@@ -1835,6 +1836,7 @@ BBCODE_STACK_CLASS => $this->current_class,
 $this->lexer->verbatim = false;
 if ($token_type == BBCODE_EOI) {
 $this->lexer->RestoreState($state);
+$this->text_length = $text_length;
 array_splice($this->stack, $start);
 $this->Internal_ComputeCurrentClass();
 $this->stack[] = Array(

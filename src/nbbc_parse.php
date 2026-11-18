@@ -130,7 +130,7 @@
 		//-----------------------------------------------------------------------------
 		// Constructor.
 
-		private function __construct() {
+		public function __construct() {
 			$this->defaults = new BBCodeLibrary;
 			$this->tag_rules = $this->defaults->default_tag_rules;
 			$this->smileys = $this->defaults->default_smileys;
@@ -1589,6 +1589,7 @@
 			// we can't find an end tag, in which case we'll have to reject the
 			// start tag as broken.
 			$state = $this->lexer->SaveState();
+			$text_length = $this->text_length;
 			
 			$end_tag = $this->lexer->tagmarker . "/" . $tag_name . $this->lexer->end_tagmarker;
 
@@ -1650,6 +1651,8 @@
 						. " and push start tag as text after fixup.<br />\n";
 				}
 				$this->lexer->RestoreState($state);
+				// These tokens will be counted again when the parser replays them.
+				$this->text_length = $text_length;
 				array_splice($this->stack, $start);
 				$this->Internal_ComputeCurrentClass();
 				$this->stack[] = Array(

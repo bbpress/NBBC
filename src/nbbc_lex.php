@@ -99,9 +99,10 @@
 				// Match tags, as long as they do not start with [-- or [' or [!-- or [rem or [[.
 				// Tags may contain "quoted" or 'quoted' sections that may contain [ or ] characters.
 				// Tags may not contain newlines.
+				// Match quoted sections first: the ordinary-character branch also matches quotes.
 				. "{$b}"
 				. "(?! -- | ' | !-- | {$b}{$b} )"
-				. "(?: [^\\n\\r{$b}{$e}] | \\\" [^\\\"\\n\\r]* \\\" | \\' [^\\'\\n\\r]* \\' )*+"
+				. "(?: \\\" [^\\\"\\n\\r]* \\\" | \\' [^\\'\\n\\r]* \\' | [^\\n\\r{$b}{$e}] )*+"
 				. "{$e}"
 
 				// Match wiki-links, which are of the form [[...]] or [[...|...]].  Unlike
