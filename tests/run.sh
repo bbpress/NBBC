@@ -32,3 +32,6 @@ cat "$nbbc_source_log"
 
 php tests/lexer_failure.php
 NBBC_TEST_BUILD=single php tests/lexer_failure.php
+
+php tests/review_regressions.php
+NBBC_TEST_BUILD=single php tests/review_regressions.php

@@ -12,7 +12,7 @@ require_once __DIR__ . '/nbbc.php';
 echo BBCode::getInstance()->Parse('[b]Hello[/b]');
 ```
 
-`BBCode::getInstance()` returns a shared parser. Configuration set on that instance is retained for subsequent calls.
+`BBCode::getInstance()` returns the shared parser used by bbPress importers. Use `new BBCode()` when you need an independently configured parser. Configuration on either instance is retained for subsequent calls to that instance.
 
 ## Develop
 
@@ -31,4 +31,4 @@ sh tests/run.sh
 
 The suite checks that the generated file matches the source, both builds produce identical output, and lexer failures are reported clearly. It requires PHP, Perl, and the included `smileys/` fixtures. The HTML test page remains available as `test_nbbc.php`.
 
-The [original manual](readme.html) documents the parser's tags and configuration methods. It predates this fork: examples that call `new BBCode` should use `BBCode::getInstance()`, and its old PHP requirements do not apply. The [license](LICENSE) applies to both source and generated files.
+The [original manual](readme.html) documents the parser's tags and configuration methods. Its `new BBCode` examples remain valid, but its old PHP requirements do not apply. The [license](LICENSE) applies to both source and generated files.
