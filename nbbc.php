@@ -128,7 +128,7 @@ $state = BBCODE_LEXSTATE_TAG;
 $length += strlen($text);
 }
 else {
-switch (ord(substr($this->text, 0, 1))) {
+switch (ord(substr($text, 0, 1))) {
 case 10:
 case 13:
 $state = BBCODE_LEXSTATE_TEXT;
@@ -297,8 +297,7 @@ function Internal_DecodeTag($tag) {
 $result = Array('_tag' => $tag, '_endtag' => '', '_name' => '',
 '_hasend' => false, '_end' => false, '_default' => false);
 $tag = substr($tag, 1, strlen($tag)-2);
-$ch = ord(substr($tag, 0, 1));
-if ($ch <= 32) return $result;
+if ($tag === '' || ord($tag[0]) <= 32) return $result;
 $pieces = preg_split("/(\\\"[^\\\"]+\\\"|\\'[^\\']+\\'|=|[\\x00-\\x20]+)/",
 $tag, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
 $ptr = 0;
@@ -728,7 +727,7 @@ if ($bbcode->url_targetable !== false && isset($params['target']))
 $target = " target=\"" . htmlspecialchars($params['target']) . "\"";
 else $target = "";
 if ($bbcode->url_target !== false)
-if (!($bbcode->url_targetable == 'override' && isset($params['target'])))
+if (!($bbcode->url_targetable === 'override' && isset($params['target'])))
 $target = " target=\"" . htmlspecialchars($bbcode->url_target) . "\"";
 return '<a href="' . htmlspecialchars($url) . '" class="bbcode_url"' . $target . '>' . $content . '</a>';
 }
@@ -786,7 +785,7 @@ function DoWiki($bbcode, $action, $name, $default, $params, $content) {
 $name = $bbcode->Wikify($default);
 if ($action == BBCODE_CHECK)
 return strlen($name) > 0;
-$title = trim(@$params['title']);
+$title = isset($params['title']) ? trim($params['title']) : '';
 if (strlen($title) <= 0) $title = trim($default);
 return "<a href=\"{$bbcode->wiki_url}$name\" class=\"bbcode_wiki\">"
 . htmlspecialchars($title) . "</a>";
@@ -798,7 +797,7 @@ if (preg_match("/\\.(?:gif|jpeg|jpg|jpe|png)$/", $content)) {
 if (preg_match("/^[a-zA-Z0-9_][^:]+$/", $content)) {
 if (!preg_match("/(?:\\/\\.\\.\\/)|(?:^\\.\\.\\/)|(?:^\\/)/", $content)) {
 $info = @getimagesize("{$bbcode->local_img_dir}/{$content}");
-if ($info[2] == IMAGETYPE_GIF || $info[2] == IMAGETYPE_JPEG || $info[2] == IMAGETYPE_PNG) {
+if (is_array($info) && ($info[2] == IMAGETYPE_GIF || $info[2] == IMAGETYPE_JPEG || $info[2] == IMAGETYPE_PNG)) {
 return "<img src=\""
 . htmlspecialchars("{$bbcode->local_img_url}/{$content}") . "\" alt=\""
 . htmlspecialchars(basename($content)) . "\" width=\""
@@ -860,18 +859,18 @@ $ul_types = Array(
 'disc' => 'disc',
 'square' => 'square',
 );
-$default = trim($default);
+$default = trim((string) $default);
 if ($action == BBCODE_CHECK) {
-if (!is_string($default) || strlen($default) == "") return true;
+if ($default === '') return true;
 else if (isset($list_styles[$default])) return true;
 else if (isset($ci_list_styles[strtolower($default)])) return true;
 else return false;
 }
-if (!is_string($default) || strlen($default) == "") {
+if ($default === '') {
 $elem = 'ul';
 $type = '';
 }
-else if ($default == '1') {
+else if ($default === '1') {
 $elem = 'ol';
 $type = '';
 }
@@ -1001,6 +1000,7 @@ var $smiley_dir;
 var $smiley_url;
 var $smileys;
 var $smiley_regex;
+var $smiley_info;
 var $enable_smileys;
 var $wiki_url;
 var $local_img_dir;
@@ -1011,61 +1011,48 @@ var $rule_html;
 var $pre_trim;
 var $post_trim;
 var $debug;
-
-
-/* ADDED */
-// singleton instance
+var $lexer;
+var $stack;
 private static $instance;
-
-// private constructor function
-// to prevent external instantiation
-private function __construct()
-{
-	$this->defaults = new BBCodeLibrary;
-	$this->tag_rules = $this->defaults->default_tag_rules;
-	$this->smileys = $this->defaults->default_smileys;
-	$this->enable_smileys = true;
-	$this->smiley_regex = false;
-	$this->smiley_dir = $this->GetDefaultSmileyDir();
-	$this->smiley_url = $this->GetDefaultSmileyURL();
-	$this->wiki_url = $this->GetDefaultWikiURL();
-	$this->local_img_dir = $this->GetDefaultLocalImgDir();
-	$this->local_img_url = $this->GetDefaultLocalImgURL();
-	$this->rule_html = $this->GetDefaultRuleHTML();
-	$this->pre_trim = "";
-	$this->post_trim = "";
-	$this->root_class = 'block';
-	$this->lost_start_tags = Array();
-	$this->start_tags = Array();
-	$this->tag_marker = '[';
-	$this->allow_ampsersand = false;
-	$this->current_class = $this->root_class;
-	$this->debug = false;
-	$this->ignore_newlines = false;
-	$this->output_limit = 0;
-	$this->plain_mode = false;
-	$this->was_limited = false;
-	$this->limit_tail = "...";
-	$this->limit_precision = 0.15;
-	$this->detect_urls = false;
-	$this->url_pattern = '<a href="{$url/h}">{$text/h}</a>';
-	$this->url_targetable = false;
-	$this->url_target = false;
+private function __construct() {
+$this->defaults = new BBCodeLibrary;
+$this->tag_rules = $this->defaults->default_tag_rules;
+$this->smileys = $this->defaults->default_smileys;
+$this->enable_smileys = true;
+$this->smiley_regex = false;
+$this->smiley_info = Array();
+$this->smiley_dir = $this->GetDefaultSmileyDir();
+$this->smiley_url = $this->GetDefaultSmileyURL();
+$this->wiki_url = $this->GetDefaultWikiURL();
+$this->local_img_dir = $this->GetDefaultLocalImgDir();
+$this->local_img_url = $this->GetDefaultLocalImgURL();
+$this->rule_html = $this->GetDefaultRuleHTML();
+$this->pre_trim = "";
+$this->post_trim = "";
+$this->root_class = 'block';
+$this->lost_start_tags = Array();
+$this->start_tags = Array();
+$this->tag_marker = '[';
+$this->allow_ampersand = false;
+$this->current_class = $this->root_class;
+$this->debug = false;
+$this->ignore_newlines = false;
+$this->output_limit = 0;
+$this->plain_mode = false;
+$this->was_limited = false;
+$this->limit_tail = "...";
+$this->limit_precision = 0.15;
+$this->detect_urls = false;
+$this->url_pattern = '<a href="{$url/h}">{$text/h}</a>';
+$this->url_targetable = false;
+$this->url_target = false;
 }
-
-// getInstance method
-public static function getInstance()
-{
-    if(!self::$instance)
-    {
-      self::$instance = new self();
-    }
-
-    return self::$instance;
+public static function getInstance() {
+if (!self::$instance) {
+self::$instance = new self();
 }
-/* ADDED */
-
-
+return self::$instance;
+}
 function SetPreTrim($trim = "a") { $this->pre_trim = $trim; }
 function GetPreTrim() { return $this->pre_trim; }
 function SetPostTrim($trim = "a") { $this->post_trim = $trim; }
@@ -1144,12 +1131,12 @@ function GetDefaultSmileyURL() { return "smileys"; }
 function SetEnableSmileys($enable = true) { $this->enable_smileys = $enable; }
 function GetEnableSmileys() { return $this->enable_smileys; }
 function nl2br($string) {
-return preg_replace("/\\x0A|\\x0D|\\x0A\\x0D|\\x0D\\x0A/", "<br />\n", $string);
+return preg_replace("/\\x0A\\x0D|\\x0D\\x0A|\\x0A|\\x0D/", "<br />\n", $string);
 }
 function UnHTMLEncode($string) {
 if (function_exists("html_entity_decode"))
 return html_entity_decode($string);
-$string = preg_replace_callback('~&#x([0-9a-f]+);~i', array( $this, '_UnHTMLEncode_chr_callback'), $string);
+$string = preg_replace_callback('~&#x([0-9a-f]+);~i', array($this, '_UnHTMLEncode_chr_callback'), $string);
 $string = preg_replace_callback('~&#([0-9]+);~', array($this, '_UnHTMLEncode_chr_hexdec_callback'), $string);
 $trans_tbl = get_html_translation_table(HTML_ENTITIES);
 $trans_tbl = array_flip($trans_tbl);
@@ -1159,7 +1146,7 @@ function _UnHTMLEncode_chr_callback($match) {
 return chr(hexdec($match[1]));
 }
 function _UnHTMLEncode_chr_hexdec_callback($match) {
-return chr(hexdec($match[1]));
+return chr((int) $match[1]);
 }
 function Wikify($string) {
 return rawurlencode(str_replace(" ", "_",
@@ -1250,13 +1237,14 @@ $output = implode("", $output);
 return $output;
 }
 function Internal_ProcessSmileys($string) {
-if (!$this->enable_smileys || $this->plain_mode) {
+$smileys_disabled = (!$this->enable_smileys || $this->plain_mode);
+if ($this->smiley_regex === false && !$smileys_disabled) {
+$this->Internal_RebuildSmileys();
+}
+if ($this->smiley_regex === '*' || $smileys_disabled) {
 $output = $this->HTMLEncode($string);
 }
 else {
-if ($this->smiley_regex === false) {
-$this->Internal_RebuildSmileys();
-}
 $tokens = preg_split($this->smiley_regex, $string, -1, PREG_SPLIT_DELIM_CAPTURE);
 if (count($tokens) <= 1) {
 $output = $this->HTMLEncode($string);
@@ -1274,6 +1262,7 @@ $info = $this->smiley_info[$token];
 }
 else {
 $info = @getimagesize($this->smiley_dir . '/' . $this->smileys[$token]);
+$info = is_array($info) ? $info : Array('', '');
 $this->smiley_info[$token] = $info;
 }
 $alt = htmlspecialchars($token);
@@ -1296,7 +1285,8 @@ $regex[] = preg_quote("$code", '/');
 $first = false;
 }
 $regex[] = ")(?![\\w])/";
-$this->smiley_regex = implode("", $regex);
+if ($first) $this->smiley_regex = '*';
+else $this->smiley_regex = implode("", $regex);
 }
 function Internal_AutoDetectURLs($string) {
 $output = preg_split("/( (?:
@@ -1338,7 +1328,7 @@ $output = preg_split("/( (?:
 [^\\(\\)\\[\\]\\{\\}<>\\'\\\"\\x00-\\x20\\x7F-\\xFF]+
 )?
 ) | (?:
-[a-zA-Z0-9._-]{2,} @
+[a-zA-Z0-9._-]{1,} @
 (?:
 (?: (?: [a-zA-Z0-9-]{2,} \\. )+
 (?: arpa | com | org | net | edu | gov | mil | int | [a-z]{2}
@@ -1351,7 +1341,7 @@ if (count($output) > 1) {
 $is_a_url = false;
 foreach ($output as $index => $token) {
 if ($is_a_url) {
-if (preg_match("/^[a-zA-Z0-9._-]{2,}@/", $token)) {
+if (preg_match("/^[a-zA-Z0-9._-]{1,}@/", $token)) {
 $url = "mailto:" . $token;
 }
 else if (preg_match("/^(https?:|ftp:)\\/*([^\\/&?#]+)\\/*(.*)\$/", $token, $matches)) {
@@ -1409,7 +1399,7 @@ case 'double': $value = (string)$value; break;
 case 'string': break;
 default: $value = ""; break;
 }
-if (strlen(@$matches[3]))
+if (isset($matches[3]) && strlen($matches[3]))
 $flags = array_flip(str_split($matches[3]));
 else $flags = Array();
 if (!isset($flags['v'])) {
@@ -1474,7 +1464,7 @@ $end = $this->Internal_CleanupWSByIteratingPointer(@$rule['before_endtag'], 0, $
 $this->Internal_CleanupWSByPoppingStack(@$rule['after_tag'], $output);
 $tag_body = $this->Internal_CollectTextReverse($output, count($output)-1, $end);
 $this->Internal_CleanupWSByPoppingStack(@$rule['before_tag'], $this->stack);
-@$this->Internal_UpdateParamsForMissingEndTag(@$token[BBCODE_STACK_TAG]);
+$token[BBCODE_STACK_TAG] = $this->Internal_UpdateParamsForMissingEndTag($token[BBCODE_STACK_TAG]);
 $tag_output = $this->DoTag(BBCODE_OUTPUT, $name,
 @$token[BBCODE_STACK_TAG]['_default'], @$token[BBCODE_STACK_TAG], $tag_body);
 $output = Array(Array(
@@ -1558,7 +1548,7 @@ if (!$raw) $string .= "</span>";
 return $string;
 }
 function Internal_CleanupWSByPoppingStack($pattern, &$array) {
-if (strlen($pattern) <= 0) return;
+if (empty($pattern)) return;
 $oldlen = count($array);
 foreach (str_split($pattern) as $char) {
 switch ($char) {
@@ -1583,7 +1573,7 @@ $this->Internal_ComputeCurrentClass();
 }
 }
 function Internal_CleanupWSByEatingInput($pattern) {
-if (strlen($pattern) <= 0) return;
+if (empty($pattern)) return;
 foreach (str_split($pattern) as $char) {
 switch ($char) {
 case 's':
@@ -1609,7 +1599,7 @@ break;
 }
 }
 function Internal_CleanupWSByIteratingPointer($pattern, $pos, $array) {
-if (strlen($pattern) <= 0) return $pos;
+if (empty($pattern)) return $pos;
 foreach (str_split($pattern) as $char) {
 switch ($char) {
 case 's':
@@ -1768,10 +1758,10 @@ return false;
 }
 function Internal_DoEnhancedTag($tag_rule, $params, $contents) {
 $params['_content'] = $contents;
-$params['_defaultcontent'] = strlen(@$params['_default']) ? $params['_default'] : $contents;
+$params['_defaultcontent'] = isset($params['_default']) && strlen($params['_default']) ? $params['_default'] : $contents;
 return $this->FillTemplate(@$tag_rule['template'], $params, @$tag_rule['default']);
 }
-function Internal_UpdateParamsForMissingEndTag(&$params) {
+function Internal_UpdateParamsForMissingEndTag($params) {
 switch ($this->tag_marker) {
 case '[': $tail_marker = ']'; break;
 case '<': $tail_marker = '>'; break;
@@ -1780,6 +1770,7 @@ case '(': $tail_marker = ')'; break;
 default: $tail_marker = $this->tag_marker; break;
 }
 $params['_endtag'] = $this->tag_marker . '/' . $params['_name'] . $tail_marker;
+return $params;
 }
 function Internal_ProcessIsolatedTag($tag_name, $tag_params, $tag_rule) {
 if (!$this->DoTag(BBCODE_CHECK, $tag_name, @$tag_params['_default'], $tag_params, "")) {
@@ -1838,6 +1829,8 @@ BBCODE_STACK_CLASS => $this->current_class,
 $this->lexer->verbatim = false;
 if ($token_type == BBCODE_EOI) {
 $this->lexer->RestoreState($state);
+array_splice($this->stack, $start);
+$this->Internal_ComputeCurrentClass();
 $this->stack[] = Array(
 BBCODE_STACK_TOKEN => BBCODE_TEXT,
 BBCODE_STACK_TEXT => $this->FixupOutput($this->lexer->text),
@@ -1853,7 +1846,7 @@ $content = $this->Internal_CollectText($this->stack, $newstart);
 array_splice($this->stack, $start);
 $this->Internal_ComputeCurrentClass();
 $this->Internal_CleanupWSByPoppingStack(@$tag_rule['before_tag'], $this->stack);
-$tag_params['_endtag'] = $end_tag_params['_tag'];
+$tag_params['_endtag'] = $end_tag;
 $tag_params['_hasend'] = true;
 $output = $this->DoTag(BBCODE_OUTPUT, $tag_name,
 @$tag_params['_default'], $tag_params, $content);
@@ -1956,6 +1949,7 @@ BBCODE_STACK_CLASS => $this->current_class,
 );
 }
 function Parse($string) {
+$string = (string) $string;
 $this->lexer = new BBCodeLexer($string, $this->tag_marker);
 $this->lexer->debug = $this->debug;
 $old_output_limit = $this->output_limit;

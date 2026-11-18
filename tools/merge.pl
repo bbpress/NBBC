@@ -106,9 +106,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 EOI
 
-foreach $file (@files) {
-	$output .= pack_contents($file);
-	$output .= "\n";
+for my $index (0 .. $#files) {
+	$output .= pack_contents($files[$index]);
+	$output .= "\n" if $index < $#files;
 }
 
 print $output;

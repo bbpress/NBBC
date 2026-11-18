@@ -82,8 +82,22 @@ h1 { text-align: center; }
 
 <?php
 
-	require_once("src/nbbc_main.php");		// Expanded version.
-	//require_once("nbbc.php");				// Condensed version.
+	if (PHP_SAPI === 'cli') {
+		error_reporting(E_ALL);
+		set_error_handler(function($severity, $message) {
+			if (error_reporting() & $severity) {
+				throw new ErrorException($message, 0, $severity);
+			}
+			return false;
+		});
+	}
+
+	if (getenv('NBBC_TEST_BUILD') === 'single') {
+		require_once("nbbc.php");			// Generated single-file version.
+	}
+	else {
+		require_once("src/nbbc_main.php");	// Expanded source version.
+	}
 
 	$BBCodeTestSuite = Array(
 
@@ -187,7 +201,7 @@ h1 { text-align: center; }
 		Array(
 			'descr' => ":-) produces a smiley <img> element.",
 			'bbcode' => "This is a test of the emergency broadcasting system :-)",
-			'regex' => "/This is a test of the emergency broadcasting system <img src=\\\"smileys\\/smile.gif\\\" width=\\\"[0-9]*\\\" height=\\\"[0-9]*\\\" alt=\\\":-\\)\\\" title=\\\":-\\)\\\" class=\\\"bbcode_smiley\\\" \\/>/",
+			'html' => 'This is a test of the emergency broadcasting system <img src="smileys/smile.gif" width="16" height="16" alt=":-)" title=":-)" class="bbcode_smiley" />',
 		),
 		Array(
 			'descr' => "--- does *not* produce a [rule] tag.",
@@ -1091,6 +1105,24 @@ h1 { text-align: center; }
 			'bbcode' => "[list=armenian][*]One Box[*]Two Boxes[*]Three Boxes[/list]",
 			'html' => "\n<ol class=\"bbcode_list\" style=\"list-style-type:armenian\">\n<li>One Box</li>\n<li>Two Boxes</li>\n<li>Three Boxes</li>\n</ol>\n",
 		),
+		"PHP Compatibility Tests",
+		Array(
+			'descr' => "Null input produces an empty string.",
+			'bbcode' => null,
+			'html' => '',
+		),
+		Array(
+			'descr' => "Missing smiley images do not raise warnings.",
+			'bbcode' => "Hi :missing:",
+			'html' => 'Hi <img src="smileys/missing.png" width="" height="" alt=":missing:" title=":missing:" class="bbcode_smiley" />',
+			'add_smiley' => Array(':missing:', 'missing.png'),
+		),
+		Array(
+			'descr' => "An empty smiley list leaves text unchanged.",
+			'bbcode' => "No smiley :)",
+			'html' => "No smiley :)",
+			'clear_smileys' => true,
+		),
 	);
 
 	function MicroNow() {
@@ -1102,7 +1134,7 @@ h1 { text-align: center; }
 		return sprintf("%0.2f ms", $time * 1000);
 	}
 
-	$bbcode = new BBCode;
+	$bbcode = BBCode::getInstance();
 
 	$bbcode->AddRule('wstest', Array(
 		'mode' => BBCODE_MODE_ENHANCED,
@@ -1121,6 +1153,7 @@ h1 { text-align: center; }
 	$numpassed = 0;
 	$numfailed = 0;
 	$numtested = 0;
+	$rendered_output = Array();
 
 	foreach ($BBCodeTestSuite as $test) {
 		if (is_string($test)) {
@@ -1129,6 +1162,12 @@ h1 { text-align: center; }
 		}
 		else {
 			$output = "<tr class='test'><td class='descr'>" . htmlspecialchars($test['descr']) . "</td>";
+			if (isset($test['add_smiley'])) {
+				$bbcode->AddSmiley($test['add_smiley'][0], $test['add_smiley'][1]);
+			}
+			if (!empty($test['clear_smileys'])) {
+				$bbcode->ClearSmileys();
+			}
 
 			if (@$test['debug'] == true)
 				$bbcode->SetDebug(true);
@@ -1139,7 +1178,7 @@ h1 { text-align: center; }
 			else $bbcode->SetIgnoreNewlines(false);
 			if (@$test['detect_urls'] == true) $bbcode->SetDetectURLs(true);
 			else $bbcode->SetDetectURLs(false);
-			if (@$test['urltarget'] == true) $bbcode->SetURLTargetable(true);
+			if (isset($test['urltarget'])) $bbcode->SetURLTargetable($test['urltarget']);
 			else $bbcode->SetURLTargetable(false);
 			if (is_string(@$test['urlforcetarget']))
 				$bbcode->SetURLTarget($test['urlforcetarget']);
@@ -1155,17 +1194,19 @@ h1 { text-align: center; }
 				$bbcode->SetTagMarker($test['tag_marker']);
 
 			$result = $bbcode->Parse($test['bbcode']);
+			$rendered_output[] = $result;
 
 			$numtested++;
 
 			if (isset($test['regex'])) {
 				$pattern = $test['regex'];
-				if (!preg_match($test['regex'], $result))
-					$failed = true;
+				$failed = !preg_match($test['regex'], $result);
 			}
 			else {
 				$pattern = $test['html'];
-				$failed = ($result != $test['html']);
+				// PHP 8.1 changed the default htmlspecialchars() flags to escape apostrophes.
+				$failed = ($result != $test['html']
+					&& str_replace('&#039;', "'", $result) != $test['html']);
 			}
 			if (!$failed) {
 
@@ -1206,6 +1247,12 @@ h1 { text-align: center; }
 		. "</table>\n";
 
 	print "<div style='text-align:center; font-size:14pt; margin-bottom: 2em;'><b>Test Results:  $numtested tests performed.  $numpassed passed successfully, $numfailed failed.</b></div>\n";
+	if (PHP_SAPI === 'cli') {
+		fwrite(STDERR, 'NBBC_OUTPUT_SHA256=' . hash('sha256', serialize($rendered_output)) . "\n");
+	}
+	if (PHP_SAPI === 'cli' && $numfailed > 0) {
+		exit(1);
+	}
 
 ?>
 
