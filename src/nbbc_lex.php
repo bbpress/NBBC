@@ -101,7 +101,7 @@
 				// Tags may not contain newlines.
 				. "{$b}"
 				. "(?! -- | ' | !-- | {$b}{$b} )"
-				. "(?: [^\\n\\r{$b}{$e}] | \\\" [^\\\"\\n\\r]* \\\" | \\' [^\\'\\n\\r]* \\' )*"
+				. "(?: [^\\n\\r{$b}{$e}] | \\\" [^\\\"\\n\\r]* \\\" | \\' [^\\'\\n\\r]* \\' )*+"
 				. "{$e}"
 
 				// Match wiki-links, which are of the form [[...]] or [[...|...]].  Unlike
@@ -130,6 +130,12 @@
 				. " )/Dx";
 
 			$this->input = preg_split($this->pat_main, $string, -1, PREG_SPLIT_DELIM_CAPTURE);
+			if (false === $this->input) {
+				$message = function_exists('preg_last_error_msg')
+					? preg_last_error_msg()
+					: 'PCRE error ' . preg_last_error();
+				throw new RuntimeException('Unable to lex BBCode: ' . $message);
+			}
 
 			// Patterns for matching specific types of tokens during lexing.
 			$this->pat_comment = "/^ {$b} (?: -- | ' ) /Dx";

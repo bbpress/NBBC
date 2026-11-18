@@ -29,6 +29,6 @@ Run the conformance suite against both source and generated builds:
 sh tests/run.sh
 ```
 
-The suite checks that the generated file matches the source and that both builds produce identical output. It requires PHP, Perl, and the included `smileys/` fixtures. The HTML test page remains available as `test_nbbc.php`.
+The suite checks that the generated file matches the source, both builds produce identical output, and lexer failures are reported clearly. It requires PHP, Perl, and the included `smileys/` fixtures. The HTML test page remains available as `test_nbbc.php`.
 
-The [original manual](readme.html) documents the parser's tags and configuration methods. The [license](LICENSE) applies to both source and generated files.
+The [original manual](readme.html) documents the parser's tags and configuration methods. It predates this fork: examples that call `new BBCode` should use `BBCode::getInstance()`, and its old PHP requirements do not apply. The [license](LICENSE) applies to both source and generated files.
