@@ -298,7 +298,7 @@ $result = Array('_tag' => $tag, '_endtag' => '', '_name' => '',
 '_hasend' => false, '_end' => false, '_default' => false);
 $tag = substr($tag, 1, strlen($tag)-2);
 $ch = ord(substr($tag, 0, 1));
-if ($ch >= 0 && $ch <= 32) return $result;
+if ($ch <= 32) return $result;
 $pieces = preg_split("/(\\\"[^\\\"]+\\\"|\\'[^\\']+\\'|=|[\\x00-\\x20]+)/",
 $tag, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
 $ptr = 0;
@@ -802,8 +802,8 @@ if ($info[2] == IMAGETYPE_GIF || $info[2] == IMAGETYPE_JPEG || $info[2] == IMAGE
 return "<img src=\""
 . htmlspecialchars("{$bbcode->local_img_url}/{$content}") . "\" alt=\""
 . htmlspecialchars(basename($content)) . "\" width=\""
-. htmlspecialchars($info[0]) . "\" height=\""
-. htmlspecialchars($info[1]) . "\" class=\"bbcode_img\" />";
+. htmlspecialchars((string) $info[0]) . "\" height=\""
+. htmlspecialchars((string) $info[1]) . "\" class=\"bbcode_img\" />";
 }
 }
 }

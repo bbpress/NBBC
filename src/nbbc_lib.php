@@ -512,8 +512,8 @@
 							return "<img src=\""
 								. htmlspecialchars("{$bbcode->local_img_url}/{$content}") . "\" alt=\""
 								. htmlspecialchars(basename($content)) . "\" width=\""
-								. htmlspecialchars($info[0]) . "\" height=\""
-								. htmlspecialchars($info[1]) . "\" class=\"bbcode_img\" />";
+								. htmlspecialchars((string) $info[0]) . "\" height=\""
+								. htmlspecialchars((string) $info[1]) . "\" class=\"bbcode_img\" />";
 						}
 					}
 				}

@@ -422,7 +422,7 @@
 
 			// The starting bracket *must* be followed by a non-whitespace character.
 			$ch = ord(substr($tag, 0, 1));
-			if ($ch >= 0 && $ch <= 32) return $result;
+			if ($ch <= 32) return $result;
 
 			// Break it apart into words, quoted text, whitespace, and equal signs.
 			$pieces = preg_split("/(\\\"[^\\\"]+\\\"|\\'[^\\']+\\'|=|[\\x00-\\x20]+)/",
