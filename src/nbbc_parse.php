@@ -106,6 +106,7 @@
 		var $smiley_url;	// The URL path to smileys (possibly a relative path).
 		var $smileys;		// The current list of smileys.
 		var $smiley_regex;	// This is a regex, precomputed from the list of smileys above.
+		var $smiley_info;	// Cached image sizes for smileys.
 		var $enable_smileys; // Whether or not to perform smiley-parsing.
 
 		var $wiki_url;		// URL prefix used for [[wiki]] links.
@@ -121,16 +122,21 @@
 		var $post_trim;		// How to trim the whitespace at the end of the input.
 
 		var $debug;			// Enable debugging mode? (lots of output)
+		var $lexer;
+		var $stack;
+
+		private static $instance;
 
 		//-----------------------------------------------------------------------------
 		// Constructor.
 
-		function BBCode() {
+		private function __construct() {
 			$this->defaults = new BBCodeLibrary;
 			$this->tag_rules = $this->defaults->default_tag_rules;
 			$this->smileys = $this->defaults->default_smileys;
 			$this->enable_smileys = true;
 			$this->smiley_regex = false;
+			$this->smiley_info = Array();
 			$this->smiley_dir = $this->GetDefaultSmileyDir();
 			$this->smiley_url = $this->GetDefaultSmileyURL();
 			$this->wiki_url = $this->GetDefaultWikiURL();
@@ -143,7 +149,7 @@
 			$this->lost_start_tags = Array();
 			$this->start_tags = Array();
 			$this->tag_marker = '[';
-			$this->allow_ampsersand = false;
+			$this->allow_ampersand = false;
 			$this->current_class = $this->root_class;
 			$this->debug = false;
 			$this->ignore_newlines = false;
@@ -156,6 +162,14 @@
 			$this->url_pattern = '<a href="{$url/h}">{$text/h}</a>';
 			$this->url_targetable = false;
 			$this->url_target = false;
+		}
+
+		public static function getInstance() {
+			if (!self::$instance) {
+				self::$instance = new self();
+			}
+
+			return self::$instance;
 		}
 
 		//-----------------------------------------------------------------------------
@@ -276,7 +290,7 @@
 		// newlines to a <br />, and regularizes the output to just use Un*x-style
 		// newlines to boot.
 		function nl2br($string) {
-			return preg_replace("/\\x0A|\\x0D|\\x0A\\x0D|\\x0D\\x0A/", "<br />\n", $string);
+			return preg_replace("/\\x0A\\x0D|\\x0D\\x0A|\\x0A|\\x0D/", "<br />\n", $string);
 		}
 
 		// This function comes straight from the PHP documentation on html_entity_decode,
@@ -288,14 +302,22 @@
 				return html_entity_decode($string);
 				
 			// Replace numeric entities.
-			$string = preg_replace('~&#x([0-9a-f]+);~ei', 'chr(hexdec("\\1"))', $string);
-			$string = preg_replace('~&#([0-9]+);~e', 'chr("\\1")', $string);
+			$string = preg_replace_callback('~&#x([0-9a-f]+);~i', array($this, '_UnHTMLEncode_chr_callback'), $string);
+			$string = preg_replace_callback('~&#([0-9]+);~', array($this, '_UnHTMLEncode_chr_hexdec_callback'), $string);
 			
 			// Replace literal entities.
 			$trans_tbl = get_html_translation_table(HTML_ENTITIES);
 			$trans_tbl = array_flip($trans_tbl);
 
 			return strtr($string, $trans_tbl);
+		}
+
+		function _UnHTMLEncode_chr_callback($match) {
+			return chr(hexdec($match[1]));
+		}
+
+		function _UnHTMLEncode_chr_hexdec_callback($match) {
+			return chr((int) $match[1]);
 		}
 
 		// This takes an arbitrary string and makes it a wiki-safe string:  It converts
@@ -509,6 +531,7 @@
 							}
 							else {
 								$info = @getimagesize($this->smiley_dir . '/' . $this->smileys[$token]);
+								$info = is_array($info) ? $info : Array('', '');
 								$this->smiley_info[$token] = $info;
 							}
 							$alt = htmlspecialchars($token);
@@ -613,7 +636,7 @@
 						[^\\(\\)\\[\\]\\{\\}<>\\'\\\"\\x00-\\x20\\x7F-\\xFF]+
 					)?
 				) | (?:
-					[a-zA-Z0-9._-]{2,} @
+					[a-zA-Z0-9._-]{1,} @
 					(?:
 						(?: (?: [a-zA-Z0-9-]{2,} \\. )+
 							(?: arpa | com | org | net | edu | gov | mil | int | [a-z]{2}
@@ -629,7 +652,7 @@
 				foreach ($output as $index => $token) {
 					if ($is_a_url) {
 						// Decide whether we have an e-mail address or a server address.
-						if (preg_match("/^[a-zA-Z0-9._-]{2,}@/", $token)) {
+						if (preg_match("/^[a-zA-Z0-9._-]{1,}@/", $token)) {
 							// Plain e-mail address.
 							$url = "mailto:" . $token;
 						}
@@ -728,7 +751,7 @@
 
 					if (strlen(@$matches[2])) {
 						// We have one or more indexes, so break them apart and look up the requested data.
-						foreach (split(".", substr($matches[2], 1)) as $index) {
+						foreach (explode(".", substr($matches[2], 1)) as $index) {
 							if (is_array($value))
 								$value = @$value[$index];
 							else if (is_object($value)) {
@@ -749,7 +772,7 @@
 					}
 
 					// See if there are any flags.
-					if (strlen(@$matches[3]))
+					if (isset($matches[3]) && strlen($matches[3]))
 						$flags = array_flip(str_split($matches[3]));
 					else $flags = Array();
 					
@@ -901,7 +924,7 @@
 								. htmlspecialchars($tag_body) . "</tt><br />\n";
 						}
 
-						$this->Internal_UpdateParamsForMissingEndTag(@$token[BBCODE_STACK_TAG]);
+						$token[BBCODE_STACK_TAG] = $this->Internal_UpdateParamsForMissingEndTag($token[BBCODE_STACK_TAG]);
 						$tag_output = $this->DoTag(BBCODE_OUTPUT, $name,
 							@$token[BBCODE_STACK_TAG]['_default'], @$token[BBCODE_STACK_TAG], $tag_body);
 							
@@ -1114,7 +1137,7 @@
 					. htmlspecialchars($pattern) . "</tt>\"<br />\n";
 			}
 
-			if (strlen($pattern) <= 0) return;
+			if (empty($pattern)) return;
 
 			$oldlen = count($array);
 			foreach (str_split($pattern) as $char) {
@@ -1159,7 +1182,7 @@
 					. htmlspecialchars($pattern) . "</tt>\"<br />\n";
 			}
 
-			if (strlen($pattern) <= 0) return;
+			if (empty($pattern)) return;
 
 			foreach (str_split($pattern) as $char) {
 				switch ($char) {
@@ -1207,7 +1230,7 @@
 					. htmlspecialchars($pattern) . "</tt>\"<br />\n";
 			}
 
-			if (strlen($pattern) <= 0) return $pos;
+			if (empty($pattern)) return $pos;
 
 			foreach (str_split($pattern) as $char) {
 				switch ($char) {
@@ -1493,7 +1516,7 @@
 
 			// Set up the special "_content" and "_defaultcontent" parameters.
 			$params['_content'] = $contents;
-			$params['_defaultcontent'] = strlen(@$params['_default']) ? $params['_default'] : $contents;
+			$params['_defaultcontent'] = isset($params['_default']) && strlen($params['_default']) ? $params['_default'] : $contents;
 
 			// Now use common template-formatting logic.
 			return $this->FillTemplate(@$tag_rule['template'], $params, @$tag_rule['default']);
@@ -1505,7 +1528,7 @@
 		// If an end-tag is required/optional but missing, we simulate it here so that the
 		// rule handlers still see a valid '_endtag' parameter.  This way, all rules always
 		// see valid '_endtag' parameters except for rules for isolated tags.
-		function Internal_UpdateParamsForMissingEndTag(&$params) {
+		function Internal_UpdateParamsForMissingEndTag($params) {
 			switch ($this->tag_marker) {
 			case '[': $tail_marker = ']'; break;
 			case '<': $tail_marker = '>'; break;
@@ -1514,6 +1537,7 @@
 			default: $tail_marker = $this->tag_marker; break;
 			}
 			$params['_endtag'] = $this->tag_marker . '/' . $params['_name'] . $tail_marker;
+			return $params;
 		}
 
 		// Process an isolated tag, a tag that is not allowed to have an end tag.
@@ -1626,6 +1650,8 @@
 						. " and push start tag as text after fixup.<br />\n";
 				}
 				$this->lexer->RestoreState($state);
+				array_splice($this->stack, $start);
+				$this->Internal_ComputeCurrentClass();
 				$this->stack[] = Array(
 					BBCODE_STACK_TOKEN => BBCODE_TEXT,
 					BBCODE_STACK_TEXT => $this->FixupOutput($this->lexer->text),
@@ -1662,7 +1688,7 @@
 			// pass the contents through htmlspecialchars or FixupOutput
 			// or anything else that could sanitize it:  They asked for
 			// verbatim contents, so they're going to get it.
-			$tag_params['_endtag'] = $end_tag_params['_tag'];
+			$tag_params['_endtag'] = $end_tag;
 			$tag_params['_hasend'] = true;
 			$output = $this->DoTag(BBCODE_OUTPUT, $tag_name,
 				@$tag_params['_default'], $tag_params, $content);
@@ -1881,6 +1907,7 @@
 		// Core parsing routine.  Call with a BBCode string, and it returns an HTML string.
 		function Parse($string) {
 			global $BBCode_Profiler;
+			$string = (string) $string;
 
 			$BBCode_Profiler = new BBCode_Profiler;
 			$BBCode_Profiler->Begin('_Parse');

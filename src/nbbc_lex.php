@@ -71,7 +71,7 @@
 		var $pat_comment2;	// Pattern for matching comments.
 		var $pat_wiki;		// Pattern for matching wiki-links.
 
-		function BBCodeLexer($string, $tagmarker = '[') {
+		function __construct($string, $tagmarker = '[') {
 			// First thing we do is to split the input string into tuples of
 			// text and tags.  This will make it easy to tokenize.  We define a tag as
 			// anything starting with a [, ending with a ], and containing no [ or ] in
@@ -148,6 +148,10 @@
 			$this->text = "";
 		}
 
+		function BBCodeLexer($string, $tagmarker = '[') {
+			$this->__construct($string, $tagmarker);
+		}
+
 		// Compute how many non-tag characters there are in the input, give or take a few.
 		// This is optimized for speed, not accuracy, so it'll get some stuff like
 		// horizontal rules and weird whitespace characters wrong, but it's only supposed
@@ -166,7 +170,7 @@
 					$length += strlen($text);
 				}
 				else {
-					switch (ord(substr($this->text, 0, 1))) {
+					switch (ord(substr($text, 0, 1))) {
 					case 10:
 					case 13:
 						$state = BBCODE_LEXSTATE_TEXT;
@@ -289,7 +293,7 @@
 							$this->state = BBCODE_LEXSTATE_TEXT;
 							if (strlen($this->text) > 0)
 								return $this->token = BBCODE_TEXT;
-							continue;
+							continue 2;
 						}
 					default:
 						// Whitespace.
@@ -307,12 +311,12 @@
 						if (preg_match($this->pat_comment, $this->text)) {
 							// This is a comment, not a tag, so treat it like it doesn't exist.
 							$this->state = BBCODE_LEXSTATE_TEXT;
-							continue;
+							continue 2;
 						}
 						if (preg_match($this->pat_comment2, $this->text)) {
 							// This is a comment, not a tag, so treat it like it doesn't exist.
 							$this->state = BBCODE_LEXSTATE_TEXT;
-							continue;
+							continue 2;
 						}
 						
 						// See if this is a [[wiki link]]; if so, convert it into a [wiki="" title=""] tag.
@@ -421,8 +425,7 @@
 			$tag = substr($tag, 1, strlen($tag)-2);
 
 			// The starting bracket *must* be followed by a non-whitespace character.
-			$ch = ord(substr($tag, 0, 1));
-			if ($ch <= 32) return $result;
+			if ($tag === '' || ord($tag[0]) <= 32) return $result;
 
 			// Break it apart into words, quoted text, whitespace, and equal signs.
 			$pieces = preg_split("/(\\\"[^\\\"]+\\\"|\\'[^\\']+\\'|=|[\\x00-\\x20]+)/",

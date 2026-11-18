@@ -418,7 +418,7 @@
 					$target = " target=\"" . htmlspecialchars($params['target']) . "\"";
 				else $target = "";
 				if ($bbcode->url_target !== false)
-					if (!($bbcode->url_targetable == 'override' && isset($params['target'])))
+					if (!($bbcode->url_targetable === 'override' && isset($params['target'])))
 						$target = " target=\"" . htmlspecialchars($bbcode->url_target) . "\"";
 				return '<a href="' . htmlspecialchars($url) . '" class="bbcode_url"' . $target . '>' . $content . '</a>';
 			}
@@ -491,7 +491,7 @@
 			$name = $bbcode->Wikify($default);
 			if ($action == BBCODE_CHECK)
 				return strlen($name) > 0;
-			$title = trim(@$params['title']);
+			$title = isset($params['title']) ? trim($params['title']) : '';
 			if (strlen($title) <= 0) $title = trim($default);
 			return "<a href=\"{$bbcode->wiki_url}$name\" class=\"bbcode_wiki\">"
 				. htmlspecialchars($title) . "</a>";
@@ -508,7 +508,7 @@
 					// No protocol, so the image is in our local image directory, or somewhere under it.
 					if (!preg_match("/(?:\\/\\.\\.\\/)|(?:^\\.\\.\\/)|(?:^\\/)/", $content)) {
 						$info = @getimagesize("{$bbcode->local_img_dir}/{$content}");
-						if ($info[2] == IMAGETYPE_GIF || $info[2] == IMAGETYPE_JPEG || $info[2] == IMAGETYPE_PNG) {
+						if (is_array($info) && ($info[2] == IMAGETYPE_GIF || $info[2] == IMAGETYPE_JPEG || $info[2] == IMAGETYPE_PNG)) {
 							return "<img src=\""
 								. htmlspecialchars("{$bbcode->local_img_url}/{$content}") . "\" alt=\""
 								. htmlspecialchars(basename($content)) . "\" width=\""
@@ -610,21 +610,21 @@
 				'square' => 'square',
 			);
 
-			$default = trim($default);
+			$default = trim((string) $default);
 
 			if ($action == BBCODE_CHECK) {
-				if (!is_string($default) || strlen($default) == "") return true;
+				if ($default === '') return true;
 				else if (isset($list_styles[$default])) return true;
 				else if (isset($ci_list_styles[strtolower($default)])) return true;
 				else return false;
 			}
 
 			// Choose a list element (<ul> or <ol>) and a style.
-			if (!is_string($default) || strlen($default) == "") {
+			if ($default === '') {
 				$elem = 'ul';
 				$type = '';
 			}
-			else if ($default == '1') {
+			else if ($default === '1') {
 				$elem = 'ol';
 				$type = '';
 			}
