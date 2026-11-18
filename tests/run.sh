@@ -35,3 +35,6 @@ NBBC_TEST_BUILD=single php tests/lexer_failure.php
 
 php tests/review_regressions.php
 NBBC_TEST_BUILD=single php tests/review_regressions.php
+
+php tests/static_analysis_regressions.php
+NBBC_TEST_BUILD=single php tests/static_analysis_regressions.php

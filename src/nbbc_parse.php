@@ -568,7 +568,7 @@
 			else $this->smiley_regex = implode("", $regex);
 
 			if ($this->debug)
-				print "<b>Internal_RebuildSmileys:</b> regex: <tt>" . htmlspecialchars($regex) . "</tt><br />\n";
+				print "<b>Internal_RebuildSmileys:</b> regex: <tt>" . htmlspecialchars($this->smiley_regex) . "</tt><br />\n";
 		}
 
 		// Search through the input for URLs, or things that are URL-like.  We search
@@ -772,7 +772,7 @@
 					}
 
 					// See if there are any flags.
-					if (isset($matches[3]) && strlen($matches[3]))
+					if (isset($matches[3]))
 						$flags = array_flip(str_split($matches[3]));
 					else $flags = Array();
 					

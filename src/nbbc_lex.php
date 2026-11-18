@@ -416,6 +416,7 @@
 		//    ' '   Token is whitespace.
 		//    '"'   Token is quoted text.
 		//    'A'   Token is unquoted text.
+		/** @return -1|'='|' '|'"'|'A' */
 		function Internal_ClassifyPiece($ptr, $pieces) {
 			if ($ptr >= count($pieces)) return -1;	// EOI.
 			$piece = $pieces[$ptr];
@@ -551,7 +552,7 @@
 					$ptr++;
 					continue;
 				}
-				else if ($type == -1) break;
+				else break;
 
 				// Skip whitespace after the key name.
 				while (($type = $this->Internal_ClassifyPiece($ptr, $pieces)) == ' ')

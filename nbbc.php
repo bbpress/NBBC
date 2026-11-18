@@ -299,6 +299,7 @@ else if (preg_match("/^\\'(.*)\\'$/", $string, $matches))
 return $matches[1];
 else return $string;
 }
+/** @return -1|'='|' '|'"'|'A' */
 function Internal_ClassifyPiece($ptr, $pieces) {
 if ($ptr >= count($pieces)) return -1;
 $piece = $pieces[$ptr];
@@ -376,7 +377,7 @@ else if ($type == '=') {
 $ptr++;
 continue;
 }
-else if ($type == -1) break;
+else break;
 while (($type = $this->Internal_ClassifyPiece($ptr, $pieces)) == ' ')
 $ptr++;
 if ($type != '=')
@@ -450,7 +451,6 @@ var $default_smileys = Array(
 '>_>'=> 'lookright.gif', '>.>' => 'lookright.gif',
 '<_<'=> 'lookleft.gif', '<.<' => 'lookleft.gif',
 'XD' => 'laugh.gif', 'X-D' => 'laugh.gif',
-';D' => 'bigwink.gif', ';-D' => 'bigwink.gif',
 ':3' => 'smile3.gif', ':-3' => 'smile3.gif',
 '=3' => 'smile3.gif', '=-3' => 'smile3.gif',
 ';3' => 'wink3.gif', ';-3' => 'wink3.gif',
@@ -880,13 +880,10 @@ else if (isset($list_styles[$default])) return true;
 else if (isset($ci_list_styles[strtolower($default)])) return true;
 else return false;
 }
-if ($default === '') {
 $elem = 'ul';
 $type = '';
-}
-else if ($default === '1') {
+if ($default === '1') {
 $elem = 'ol';
-$type = '';
 }
 else if (isset($list_styles[$default])) {
 $elem = 'ol';
@@ -1413,7 +1410,7 @@ case 'double': $value = (string)$value; break;
 case 'string': break;
 default: $value = ""; break;
 }
-if (isset($matches[3]) && strlen($matches[3]))
+if (isset($matches[3]))
 $flags = array_flip(str_split($matches[3]));
 else $flags = Array();
 if (!isset($flags['v'])) {

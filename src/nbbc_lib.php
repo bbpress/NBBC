@@ -106,7 +106,6 @@
 			'>_>'=> 'lookright.gif',   '>.>' => 'lookright.gif',
 			'<_<'=> 'lookleft.gif',    '<.<' => 'lookleft.gif',
 			'XD' => 'laugh.gif',       'X-D' => 'laugh.gif',
-			';D' => 'bigwink.gif',     ';-D' => 'bigwink.gif',
 			':3' => 'smile3.gif',      ':-3' => 'smile3.gif',
 			'=3' => 'smile3.gif',      '=-3' => 'smile3.gif',
 			';3' => 'wink3.gif',       ';-3' => 'wink3.gif',
@@ -620,13 +619,10 @@
 			}
 
 			// Choose a list element (<ul> or <ol>) and a style.
-			if ($default === '') {
-				$elem = 'ul';
-				$type = '';
-			}
-			else if ($default === '1') {
+			$elem = 'ul';
+			$type = '';
+			if ($default === '1') {
 				$elem = 'ol';
-				$type = '';
 			}
 			else if (isset($list_styles[$default])) {
 				$elem = 'ol';
