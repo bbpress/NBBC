@@ -92,7 +92,7 @@ $this->end_tagmarker = $endmarkers[$tagmarker];
 $this->pat_main = "/( "
 . "{$b}"
 . "(?! -- | ' | !-- | {$b}{$b} )"
-. "(?: [^\\n\\r{$b}{$e}] | \\\" [^\\\"\\n\\r]* \\\" | \\' [^\\'\\n\\r]* \\' )*"
+. "(?: [^\\n\\r{$b}{$e}] | \\\" [^\\\"\\n\\r]* \\\" | \\' [^\\'\\n\\r]* \\' )*+"
 . "{$e}"
 . "| {$b}{$b} (?: [^{$e}\\r\\n] | {$e}[^{$e}\\r\\n] )* {$e}{$e}"
 . "| {$b} (?: -- | ' ) (?: [^{$e}\\n\\r]* ) {$e}"
@@ -103,6 +103,12 @@ $this->pat_main = "/( "
 . "| (?<=[\\x0D\\x0A{$e}]|-----|^)[\\x00-\\x09\\x0B-\\x0C\\x0E-\\x20]+"
 . " )/Dx";
 $this->input = preg_split($this->pat_main, $string, -1, PREG_SPLIT_DELIM_CAPTURE);
+if (false === $this->input) {
+$message = function_exists('preg_last_error_msg')
+? preg_last_error_msg()
+: 'PCRE error ' . preg_last_error();
+throw new RuntimeException('Unable to lex BBCode: ' . $message);
+}
 $this->pat_comment = "/^ {$b} (?: -- | ' ) /Dx";
 $this->pat_comment2 = "/^ {$b}!-- (?: [^-] | -[^-] | --[^{$e}] )* --{$e} $/Dx";
 $this->pat_wiki = "/^ {$b}{$b} ([^\\|]*) (?:\\|(.*))? {$e}{$e} $/Dx";
@@ -1798,7 +1804,7 @@ $end_tag = $this->lexer->tagmarker . "/" . $tag_name . $this->lexer->end_tagmark
 $start = count($this->stack);
 $this->lexer->verbatim = true;
 while (($token_type = $this->lexer->NextToken()) != BBCODE_EOI) {
-if ($this->lexer->text == $end_tag) {
+if (strcasecmp($this->lexer->text, $end_tag) === 0) {
 $end_tag_params = $this->lexer->tag;
 break;
 }

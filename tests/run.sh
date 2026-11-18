@@ -29,3 +29,6 @@ cmp "$nbbc_source_log" "$nbbc_single_log"
 sed -n '/Test Results:/p' "$nbbc_source_output"
 sed -n '/Test Results:/p' "$nbbc_single_output"
 cat "$nbbc_source_log"
+
+php tests/lexer_failure.php
+NBBC_TEST_BUILD=single php tests/lexer_failure.php

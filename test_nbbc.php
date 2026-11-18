@@ -120,6 +120,11 @@ h1 { text-align: center; }
 			'html' => "This is [/foo a tag.",
 		),
 		Array(
+			'descr' => "An unclosed tag with quoted text does not break following tags.",
+			'bbcode' => 'Broken [{' . str_repeat('"a":"b",', 12) . ' and [b]real[/b].',
+			'html' => 'Broken [{' . str_repeat('&quot;a&quot;:&quot;b&quot;,', 12) . ' and <b>real</b>.',
+		),
+		Array(
 			'descr' => "Broken tags like [] get ignored.",
 			'bbcode' => "This is [] a tag.",
 			'html' => "This is [] a tag.",
@@ -853,6 +858,14 @@ h1 { text-align: center; }
 					. "\tAnd a ['hey'] and a [/nonny] and a ho ho ho!</div>\n"
 				. "</div>\n"
 				. "Also not code.",
+		),
+		Array(
+			'descr' => "[code] accepts an uppercase end tag.",
+			'bbcode' => "[code]Uppercase end tag[/CODE]",
+			'html' => "\n<div class=\"bbcode_code\">\n"
+				. "<div class=\"bbcode_code_head\">Code:</div>\n"
+				. "<div class=\"bbcode_code_body\" style=\"white-space:pre\">Uppercase end tag</div>\n"
+				. "</div>\n",
 		),
 		Array(
 			'descr' => "[code]...[/code] should reproduce PHP source code undamaged.",
