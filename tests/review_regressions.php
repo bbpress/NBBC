@@ -38,8 +38,43 @@ $expected_quote = "\n<div class=\"bbcode_quote\">\n"
 	. "<div class=\"bbcode_quote_head\">A [B] wrote:</div>\n"
 	. "<div class=\"bbcode_quote_body\">text</div>\n"
 	. "</div>\n";
-foreach (array('[quote="A [B]"]text[/quote]', "[quote='A [B]']text[/quote]") as $input) {
+foreach (array(
+	'[quote="A [B]"]text[/quote]',
+	"[quote='A [B]']text[/quote]",
+	'[quote name="A [B]"]text[/quote]',
+	"[quote name='A [B]']text[/quote]",
+) as $input) {
 	expect_review_result($second->Parse($input), $expected_quote, 'Quoted attribute containing a bracket');
 }
 
-echo "Three post-merge review regressions passed.\n";
+$standalone_quote = "\n<div class=\"bbcode_quote\">\n"
+	. "<div class=\"bbcode_quote_head\">Quote:</div>\n"
+	. "<div class=\"bbcode_quote_body\">text</div>\n"
+	. "</div>\n";
+expect_review_result($second->Parse('[quote "A [B]"]text[/quote]'),
+	$standalone_quote, 'Quoted token without an equals sign');
+
+$apostrophe_expected = "\n<div class=\"bbcode_quote\">\n"
+	. "<div class=\"bbcode_quote_head\">O'Brien wrote:</div>\n"
+	. "<div class=\"bbcode_quote_body\">one</div>\n"
+	. "</div>\n"
+	. "\n<div class=\"bbcode_quote\">\n"
+	. "<div class=\"bbcode_quote_head\">O'Brien wrote:</div>\n"
+	. "<div class=\"bbcode_quote_body\">two</div>\n"
+	. "</div>\n";
+// PHP 8.1 and later escape apostrophes by default; this assertion checks tag structure.
+foreach (array(
+	"[quote=O'Brien]one[/quote][quote=O'Brien]two[/quote]",
+	"[quote name=O'Brien]one[/quote][quote name=O'Brien]two[/quote]",
+) as $apostrophe_input) {
+	expect_review_result(str_replace('&#039;', "'", $second->Parse($apostrophe_input)),
+		$apostrophe_expected, 'Repeated unquoted apostrophes');
+}
+
+$url_input = "[url=https://example.com/?q='foo]x[/url][url=https://example.com/?q='bar]y[/url]";
+$url_expected = "<a href=\"https://example.com/?q='foo\" class=\"bbcode_url\">x</a>"
+	. "<a href=\"https://example.com/?q='bar\" class=\"bbcode_url\">y</a>";
+expect_review_result(str_replace('&#039;', "'", $second->Parse($url_input)),
+	$url_expected, 'Repeated URLs with apostrophes after query equals signs');
+
+echo "Four post-merge review regressions passed.\n";
