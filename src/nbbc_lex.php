@@ -99,10 +99,19 @@
 				// Match tags, as long as they do not start with [-- or [' or [!-- or [rem or [[.
 				// Tags may contain "quoted" or 'quoted' sections that may contain [ or ] characters.
 				// Tags may not contain newlines.
-				// Match quoted sections first: the ordinary-character branch also matches quotes.
+				// Match complete quoted values after a key or whitespace before bare
+				// tokens.  A later '=' inside a bare URL must not start a quote.
 				. "{$b}"
 				. "(?! -- | ' | !-- | {$b}{$b} )"
-				. "(?: \\\" [^\\\"\\n\\r]* \\\" | \\' [^\\'\\n\\r]* \\' | [^\\n\\r{$b}{$e}] )*+"
+				. "(?: [^\\x00-\\x20={$b}{$e}]+ [\\x00-\\x09\\x0B\\x0C\\x0E-\\x20]*"
+				. " = [\\x00-\\x09\\x0B\\x0C\\x0E-\\x20]*"
+				. " (?: \\\" [^\\\"\\n\\r]* \\\" | \\' [^\\'\\n\\r]* \\' )"
+				. " | [\\x00-\\x09\\x0B\\x0C\\x0E-\\x20]+"
+				. " (?: \\\" [^\\\"\\n\\r]* \\\" | \\' [^\\'\\n\\r]* \\' )"
+				. " (?=[\\x00-\\x20{$e}])"
+				. " | [^\\x00-\\x20{$b}{$e}]+"
+				. " | [\\x00-\\x09\\x0B\\x0C\\x0E-\\x20]+"
+				. " )*+"
 				. "{$e}"
 
 				// Match wiki-links, which are of the form [[...]] or [[...|...]].  Unlike
