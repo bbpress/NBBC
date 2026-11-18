@@ -77,4 +77,16 @@ $url_expected = "<a href=\"https://example.com/?q='foo\" class=\"bbcode_url\">x<
 expect_review_result(str_replace('&#039;', "'", $second->Parse($url_input)),
 	$url_expected, 'Repeated URLs with apostrophes after query equals signs');
 
-echo "Four post-merge review regressions passed.\n";
+$quoted_key_expected = "\n<div class=\"bbcode_quote\">\n"
+	. "<div class=\"bbcode_quote_head\">Quote:</div>\n"
+	. "<div class=\"bbcode_quote_body\">text</div>\n"
+	. "</div>\n";
+foreach (array(
+	'[quote "A [B]"=x]text[/quote]',
+	"[quote 'A [B]'=x]text[/quote]",
+) as $input) {
+	expect_review_result($second->Parse($input), $quoted_key_expected,
+		'Quoted parameter name containing a bracket');
+}
+
+echo "Five post-merge review regressions passed.\n";
