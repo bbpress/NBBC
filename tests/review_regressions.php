@@ -89,4 +89,17 @@ foreach (array(
 		'Quoted parameter name containing a bracket');
 }
 
-echo "Five post-merge review regressions passed.\n";
+foreach (array(
+	'[quote "A [B]"="C [D]"]text[/quote]',
+	"[quote 'A [B]' = 'C [D]']text[/quote]",
+) as $input) {
+	$lexer = new BBCodeLexer($input);
+	expect_review_result($lexer->NextToken(), BBCODE_TAG, 'Quoted name and value token type');
+	expect_review_result($lexer->tag['_tag'], substr($input, 0, strpos($input, ']text') + 1),
+		'Complete quoted name and value tag');
+	expect_review_result($lexer->tag['a [b]'], 'C [D]', 'Quoted name and value decoding');
+	expect_review_result($second->Parse($input), $quoted_key_expected,
+		'Quoted parameter name and value containing brackets');
+}
+
+echo "Review regressions passed.\n";
