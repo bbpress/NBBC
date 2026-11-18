@@ -38,3 +38,6 @@ NBBC_TEST_BUILD=single php tests/review_regressions.php
 
 php tests/static_analysis_regressions.php
 NBBC_TEST_BUILD=single php tests/static_analysis_regressions.php
+
+php tests/bbpress_compat.php
+NBBC_TEST_BUILD=single php tests/bbpress_compat.php
