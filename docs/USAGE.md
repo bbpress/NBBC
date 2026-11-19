@@ -33,9 +33,9 @@ $parser->SetSmileyURL('https://example.com/smileys');
 
 The defaults for both settings are `smileys`. If only `nbbc.php` is deployed, call `SetEnableSmileys(false)` as shown above. Setting the paths to `false` does not disable smiley parsing.
 
-bbPress converters load their own bundled `src/includes/admin/parser.php` and call `Parse()` through its singleton. The converter callback copies `$bbcode_parser_properties`, including `smiley_url` and `smiley_dir`, onto that parser before parsing. Set this property in a converter to configure the bundled copy. Both parser files declare the same global classes, so do not require this fork's `nbbc.php` in a process that runs bbPress converters. The default rules support common tags such as `[b]`, `[i]`, `[url]`, `[email]`, `[img]`, `[quote]`, `[code]`, and `[list]`, as well as wiki links. See the [historical manual](../readme.html) for the larger tag and rule reference.
+bbPress intentionally bundles its own copy at `src/includes/admin/parser.php`. Its converter callback loads that file and copies `$bbcode_parser_properties`, including `smiley_url` and `smiley_dir`, onto the parser singleton before calling `Parse()`. Configure that property in a converter when needed. Both parser files declare the same global classes, so do not also require this fork's `nbbc.php` in the converter process. Changes to this fork reach bbPress when its bundled copy is updated separately.
 
-bbPress trunk still loads its own bundled `src/includes/admin/parser.php` from the converter callback. Updating this repository alone does not update that copy; it needs a separate bbPress integration change.
+The default rules support common tags such as `[b]`, `[i]`, `[url]`, `[email]`, `[img]`, `[quote]`, `[code]`, and `[list]`, as well as wiki links. See the [historical manual](../readme.html) for the larger tag and rule reference.
 
 ## Output compatibility
 
