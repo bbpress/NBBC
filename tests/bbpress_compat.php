@@ -81,4 +81,21 @@ expect_compat_result($parser->Parse('Hi :nbbc-test:'),
 	'Hi <img src="https://example.test/wp-includes/images/smilies/nbbc-missing.gif" width="" height="" alt=":nbbc-test:" title=":nbbc-test:" class="bbcode_smiley" />',
 	'Converter with WordPress smiley URL');
 
+// Use a new token so earlier parses cannot supply cached dimensions. Changing
+// directories also makes the default relative smiley_dir point at no image.
+$parser->AddSmiley(':nbbc-fixture:', 'smile.gif');
+$parser->smiley_dir = realpath(__DIR__ . '/../smileys');
+$previous_dir = getcwd();
+if (false === $parser->smiley_dir || false === $previous_dir || !chdir(__DIR__)) {
+	throw new RuntimeException('Unable to set up the smiley directory fixture.');
+}
+
+try {
+	expect_compat_result($parser->Parse('Hi :nbbc-fixture:'),
+		'Hi <img src="https://example.test/wp-includes/images/smilies/smile.gif" width="16" height="16" alt=":nbbc-fixture:" title=":nbbc-fixture:" class="bbcode_smiley" />',
+		'Converter with configured smiley directory and uncached image dimensions');
+} finally {
+	chdir($previous_dir);
+}
+
 echo count($parser_cases) . " bbPress parser fixtures and converter property checks passed.\n";
