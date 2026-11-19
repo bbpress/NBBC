@@ -47,4 +47,4 @@ Some escaping still depends on PHP's default `htmlspecialchars()` flags. The leg
 
 ## Development
 
-Edit `src/`, then regenerate `nbbc.php` with `cd tools && perl merge.pl > ../nbbc.php`. Run `sh tests/run.sh` to check that the generated file matches the source and that both builds pass the same tests. Run `composer install` and `composer analyse` for static analysis. CI runs the parser suite on PHP 7.4 through 8.5 and PHPStan against PHP 7.4 as the target version.
+Edit `src/`, then regenerate `nbbc.php` with `cd tools && perl merge.pl > ../nbbc.php`. Run `sh tests/run.sh` to check that the generated file matches the source and that both builds pass the same tests. Run `composer install` and `composer analyse` for static analysis. CI runs the parser suite on PHP 7.4 through 8.6 and PHPStan against PHP 7.4 as the target version.
