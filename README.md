@@ -4,7 +4,7 @@ This is bbPress's fork of Sean Werkema's New BBCode Parser. It converts BBCode t
 
 ## Use
 
-Only the generated `nbbc.php` file is needed at runtime:
+For standalone use, the generated `nbbc.php` is the only required PHP file. Default smileys also need image assets; the [usage guide](docs/USAGE.md) explains how to configure or disable them.
 
 ```php
 require_once __DIR__ . '/nbbc.php';
@@ -12,7 +12,7 @@ require_once __DIR__ . '/nbbc.php';
 echo BBCode::getInstance()->Parse('[b]Hello[/b]');
 ```
 
-`BBCode::getInstance()` returns the shared parser used by bbPress importers. Use `new BBCode()` when you need an independently configured parser. Configuration on either instance is retained for subsequent calls to that instance.
+`BBCode::getInstance()` returns a parser shared within the current PHP process. Use `new BBCode()` when you need an independently configured parser. Configuration on either instance is retained for subsequent calls to that instance. bbPress importers use their own bundled copy of the parser; do not load this file alongside it.
 
 ## Develop
 
