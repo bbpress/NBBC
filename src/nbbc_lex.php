@@ -51,26 +51,48 @@
 	//
 	//-----------------------------------------------------------------------------
 
+	/**
+	 * @phpstan-type BBCodeTag array{_name:string, _tag:string, _end:bool, _endtag:string|false, _hasend:bool, _default:string|false, _params?:list<array{key:string,value:string}>, ...}
+	 */
 	class BBCodeLexer {
+		/** @var int */
 		var $token;			// Return token type:  One of the BBCODE_* constants.
+		/** @var string */
 		var $text;			// Actual exact, original text of token.
+		/** @var BBCodeTag|false */
 		var $tag;			// If token is a tag, this is the decoded array version.
 		
+		/** @var int */
 		var $state;			// Next state of the lexer's state machine: text, or tag/ws/nl
+		/** @var list<string> */
 		var $input;			// The input string, split into an array of tokens.
+		/** @var int */
 		var $ptr;			// Read pointer into the input array.
+		/** @var bool */
 		var $unget;			// Whether to "unget" the last token.
 		
+		/** @var bool */
 		var $verbatim;		// In verbatim mode, we return all input, unparsed, including comments.
+		/** @var bool|null */
 		var $debug;			// In debug mode, we dump decoded tags when we find them.
 
+		/** @var string */
 		var $tagmarker;		// Which kind of tag marker we're using:  "[", "<", "(", or "{"
+		/** @var string */
 		var $end_tagmarker;	// The ending tag marker:  "]", ">", "(", or "{"
+		/** @var string */
 		var $pat_main;		// Main tag-matching pattern.
+		/** @var string */
 		var $pat_comment;	// Pattern for matching comments.
+		/** @var string */
 		var $pat_comment2;	// Pattern for matching comments.
+		/** @var string */
 		var $pat_wiki;		// Pattern for matching wiki-links.
 
+		/**
+		 * @param string $string
+		 * @param string $tagmarker
+		 */
 		function __construct($string, $tagmarker = '[') {
 			// First thing we do is to split the input string into tuples of
 			// text and tags.  This will make it easy to tokenize.  We define a tag as
@@ -142,13 +164,14 @@
 
 				. " )/Dx";
 
-			$this->input = preg_split($this->pat_main, $string, -1, PREG_SPLIT_DELIM_CAPTURE);
-			if (false === $this->input) {
+			$input = preg_split($this->pat_main, $string, -1, PREG_SPLIT_DELIM_CAPTURE);
+			if (false === $input) {
 				$message = function_exists('preg_last_error_msg')
 					? preg_last_error_msg()
 					: 'PCRE error ' . preg_last_error();
 				throw new RuntimeException('Unable to lex BBCode: ' . $message);
 			}
+			$this->input = $input;
 
 			// Patterns for matching specific types of tokens during lexing.
 			$this->pat_comment = "/^ {$b} (?: -- | ' ) /Dx";
@@ -167,6 +190,11 @@
 			$this->text = "";
 		}
 
+		/**
+		 * @param string $string
+		 * @param string $tagmarker
+		 * @return void
+		 */
 		function BBCodeLexer($string, $tagmarker = '[') {
 			$this->__construct($string, $tagmarker);
 		}
@@ -175,6 +203,7 @@
 		// This is optimized for speed, not accuracy, so it'll get some stuff like
 		// horizontal rules and weird whitespace characters wrong, but it's only supposed
 		// to provide a rough quick guess, not a hard fact.
+		/** @return int */
 		function GuessTextLength() {
 			$length = 0;
 			$ptr = 0;
@@ -226,6 +255,7 @@
 		//       ...all other key => value parameters given in the tag...
 		//       ...
 		//    )
+		/** @return int */
 		function NextToken() {
 		
 			// Handle ungets; if the last token has been "ungotten", just return it again.
@@ -246,8 +276,9 @@
 				
 				// Inhale one token, sanitizing away any weird control characters.  We
 				// allow \t, \r, and \n to pass through, but that's it.
-				$this->text = preg_replace("/[\\x00-\\x08\\x0B-\\x0C\\x0E-\\x1F]/", "",
-					$this->input[$this->ptr++]);
+				$text = $this->input[$this->ptr++];
+				$clean = preg_replace("/[\\x00-\\x08\\x0B-\\x0C\\x0E-\\x1F]/", "", $text);
+				$this->text = null === $clean ? $text : $clean;
 				
 				if ($this->verbatim) {
 
@@ -303,7 +334,8 @@
 					case 45:
 						// A rule made of hyphens; return it as a [rule] tag.
 						if (preg_match("/^-----/", $this->text)) {
-							$this->tag = Array('_name' => 'rule', '_endtag' => false, '_default' => '');
+							$this->tag = Array('_name' => 'rule', '_tag' => $this->text,
+								'_end' => false, '_endtag' => false, '_hasend' => false, '_default' => '');
 							$this->state = BBCODE_LEXSTATE_TEXT;
 							return $this->token = BBCODE_TAG;
 						}
@@ -340,7 +372,8 @@
 						
 						// See if this is a [[wiki link]]; if so, convert it into a [wiki="" title=""] tag.
 						if (preg_match($this->pat_wiki, $this->text, $matches)) {
-							$this->tag = Array('_name' => 'wiki', '_endtag' => false,
+							$this->tag = Array('_name' => 'wiki', '_tag' => $this->text,
+								'_end' => false, '_endtag' => false, '_hasend' => false,
 								'_default' => @$matches[1], 'title' => @$matches[2]);
 							$this->state = BBCODE_LEXSTATE_TEXT;
 							return $this->token = BBCODE_TAG;
@@ -360,12 +393,14 @@
 		// between verbatim mode and standard mode:  For example, if you read a tag,
 		// unget the tag, switch to verbatim mode, and then get the next token, you'll
 		// get back a BBCODE_TAG --- exactly what you ungot, not a BBCODE_TEXT token.
+		/** @return void */
 		function UngetToken() {
 			if ($this->token !== BBCODE_EOI)
 				$this->unget = true;
 		}
 
 		// Peek at the next token, but don't remove it.
+		/** @return int */
 		function PeekToken() {
 			$result = $this->NextToken();
 			if ($this->token !== BBCODE_EOI)
@@ -377,6 +412,7 @@
 		// value from this should be considered opaque.  Because PHP uses copy-on-write
 		// references, the total cost of the returned state is relatively small, and
 		// the running time of this function (and RestoreState) is very fast.
+		/** @return array{token:int, text:string, tag:BBCodeTag|false, state:int, input:list<string>, ptr:int, unget:bool, verbatim:bool} */
 		function SaveState() {
 			return Array(
 				'token' => $this->token,
@@ -391,6 +427,10 @@
 		}
 		
 		// Restore the state of this lexer from a saved previous state.
+		/**
+		 * @param array{token:int, text:string, tag:BBCodeTag|false, state:int, input:list<string>, ptr:int, unget:bool, verbatim:bool} $state
+		 * @return void
+		 */
 		function RestoreState($state) {
 			if (!is_array($state)) return;
 			$this->token = @$state['token'];
@@ -404,6 +444,10 @@
 		}
 
 		// Given a string, if it's surrounded by "quotes" or 'quotes', remove them.
+		/**
+		 * @param string $string
+		 * @return string
+		 */
 		function Internal_StripQuotes($string) {
 			if (preg_match("/^\\\"(.*)\\\"$/", $string, $matches))
 				return $matches[1];
@@ -419,7 +463,11 @@
 		//    ' '   Token is whitespace.
 		//    '"'   Token is quoted text.
 		//    'A'   Token is unquoted text.
-		/** @return -1|'='|' '|'"'|'A' */
+		/**
+		 * @param int $ptr
+		 * @param list<string> $pieces
+		 * @return -1|'='|' '|'"'|'A'
+		 */
 		function Internal_ClassifyPiece($ptr, $pieces) {
 			if ($ptr >= count($pieces)) return -1;	// EOI.
 			$piece = $pieces[$ptr];
@@ -431,6 +479,10 @@
 
 		// Given a string containing a complete [tag] (including its brackets), break
 		// it down into its components and return them as an array.
+		/**
+		 * @param string $tag
+		 * @return BBCodeTag
+		 */
 		function Internal_DecodeTag($tag) {
 
 			if ($this->debug) {
@@ -453,7 +505,7 @@
 			$ptr = 0;
 
 			// Handle malformed (empty) tags correctly.
-			if (count($pieces) < 1) return $result;
+			if (false === $pieces || count($pieces) < 1) return $result;
 
 			// The first piece should be the tag name, whatever it is.  If it starts with a /
 			// we remove the / and mark it as an end tag.
@@ -471,6 +523,7 @@
 				$ptr++;
 
 			$params = Array();
+			$attributes = Array();
 
 			// If the next piece is an equal sign, then the tag's default value follows.
 			if ($type != '=') {
@@ -588,7 +641,7 @@
 				// Record this in the associative array if it's a legal public identifier name.
 				// Legal *public* identifier names must *not* begin with an underscore.
 				if (substr($key, 0, 1) != '_')
-					$result[$key] = $value;
+					$attributes[$key] = $value;
 
 				// Record this in the parameter list always.
 				$params[] = Array('key' => $key, 'value' => $value);
@@ -596,6 +649,7 @@
 
 			// Add the parameter list as a member of the associative array.
 			$result['_params'] = $params;
+			$result += $attributes;
 
 			if ($this->debug) {
 				// In debugging modes, output the tag as we collected it.

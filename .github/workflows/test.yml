@@ -29,3 +29,4 @@ jobs:
           coverage: none
       - run: composer install --no-interaction --prefer-dist --no-progress
       - run: composer analyse
+      - run: composer analyse:single

@@ -10,6 +10,7 @@
         "sort-packages": true
     },
     "scripts": {
-        "analyse": "phpstan analyse --no-progress"
+        "analyse": "phpstan analyse --no-progress",
+        "analyse:single": "phpstan analyse --no-progress nbbc.php"
     }
 }

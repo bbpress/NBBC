@@ -21,6 +21,22 @@ function expect_review_result($actual, $expected, $description) {
 	}
 }
 
+function nbbc_numeric_callback($bbcode, $action, $name, $default, $params, $content) {
+	return BBCODE_CHECK === $action ? true : 42;
+}
+
+$callback_parser = new BBCode();
+$callback_parser->AddRule('number', array(
+	'mode' => BBCODE_MODE_CALLBACK,
+	'method' => 'nbbc_numeric_callback',
+	'class' => 'inline',
+	'allow_in' => array('block', 'inline'),
+));
+expect_review_result($callback_parser->DoTag(BBCODE_OUTPUT, 'number', false, array(), 'text'),
+	42, 'Public callback result remains unchanged');
+expect_review_result($callback_parser->Parse('[number]text[/number]'),
+	'42', 'Numeric callback output is rendered as text');
+
 $first = new BBCode();
 $second = new BBCode();
 $first->SetDetectURLs(true);

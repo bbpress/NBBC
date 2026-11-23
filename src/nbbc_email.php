@@ -20,8 +20,10 @@
     class BBCodeEmailAddressValidator {
 
         // Check email address validity
-        // @param   strEmailAddress     Email address to be checked
-        // @return  True if email is valid, false if not
+        /**
+         * @param string $strEmailAddress Email address to be checked.
+         * @return bool Whether the email address is valid.
+         */
         function check_email_address($strEmailAddress) {
             
             // If magic quotes is "on", email addresses with quote marks will
@@ -75,8 +77,10 @@
         }
 
         // Checks email section before "@" symbol for validity
-        // @param   strLocalPortion     Text to be checked
-        // @return  True if local portion is valid, false if not
+        /**
+         * @param string $strLocalPortion Text to be checked.
+         * @return bool Whether the local portion is valid.
+         */
         function check_local_portion($strLocalPortion) {
             // Local portion can only be from 1 to 64 characters, inclusive.
             // Please note that servers are encouraged to accept longer local
@@ -104,8 +108,10 @@
         }
 
         // Checks email section after "@" symbol for validity
-        // @param   strDomainPortion     Text to be checked
-        // @return  True if domain portion is valid, false if not
+        /**
+         * @param string $strDomainPortion Text to be checked.
+         * @return bool Whether the domain portion is valid.
+         */
         function check_domain_portion($strDomainPortion) {
             // Total domain can only be from 1 to 255 characters, inclusive
             if (!$this->check_text_length($strDomainPortion, 1, 255)) {
@@ -139,10 +145,12 @@
         }
 
         // Check given text length is between defined bounds
-        // @param   strText     Text to be checked
-        // @param   intMinimum  Minimum acceptable length
-        // @param   intMaximum  Maximum acceptable length
-        // @return  True if string is within bounds (inclusive), false if not
+        /**
+         * @param string $strText Text to be checked.
+         * @param int $intMinimum Minimum acceptable length.
+         * @param int $intMaximum Maximum acceptable length.
+         * @return bool Whether the text length is within the bounds.
+         */
         function check_text_length($strText, $intMinimum, $intMaximum) {
             // Minimum and maximum are both inclusive
             $intTextLength = strlen($strText);

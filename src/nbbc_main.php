@@ -90,27 +90,46 @@
 
 	//<skip-when-compressing>
 	class BBCode_Profiler {
+		/** @var array<string, float> */
 		var $start_time, $total_times;
 		
 		function __construct()
 			{ $this->start_time = Array(); $this->total_times = Array(); }
 
+		/** @return float */
 		function Now()
 			{ list($usec, $sec) = explode(" ", microtime());
 				return ((float)$usec + (float)$sec); }
 
+		/**
+		 * @param string $group
+		 * @return void
+		 */
 		function Begin($group)
 			{ $this->start_time[$group] = $this->Now(); }
+		/**
+		 * @param string $group
+		 * @return void
+		 */
 		function End($group)
 			{ $time = $this->Now() - $this->start_time[$group];
 				if (!isset($this->total_times[$group]))
 					$this->total_times[$group] = $time;
 				else $this->total_times[$group] += $time; }
+		/**
+		 * @param string $group
+		 * @return void
+		 */
 		function Reset($group)
 			{ $this->total_times[$group] = 0; }
+		/**
+		 * @param string $group
+		 * @return float|null
+		 */
 		function Total($group)
 			{ return @$this->total_times[$group]; }
 
+		/** @return void */
 		function DumpAllGroups() {
 			print "<div>Profiled times:\n<ul>\n";
 			ksort($this->total_times);
@@ -127,6 +146,11 @@
 	//  (slower) substitute.
 
 	if (!function_exists('str_split')) {
+		/**
+		 * @param string $string
+		 * @param positive-int $split_length
+		 * @return list<string>
+		 */
 		function str_split($string, $split_length = 1) {
 			$array = explode("\r\n", chunk_split($string, $split_length));
 			array_pop($array);

@@ -31,13 +31,14 @@ sh tests/run.sh
 
 The suite checks that the generated file matches the source, both builds produce identical output, lexer failures are reported clearly, and bbPress parser and converter fixtures match their expected HTML. It requires PHP, Perl, and the included `smileys/` fixtures. The HTML test page remains available as `test_nbbc.php`.
 
-Install the development dependencies and run PHPStan against `src/` with PHP 7.4 as the target version:
+Install the development dependencies and run PHPStan at level 9 against both `src/` and the generated `nbbc.php`, with PHP 7.4 as the target version:
 
 ```sh
 composer install
 composer analyse
+composer analyse:single
 ```
 
-The generated `nbbc.php` is checked against `src/` by the conformance suite, so PHPStan analyzes the source files only. Composer and PHPStan are development tools; the single-file runtime does not require them.
+The conformance suite also checks that the generated file matches the source. Composer and PHPStan are development tools; the single-file runtime does not require them.
 
 The [current usage guide](docs/USAGE.md) covers basic use and output compatibility. The [original manual](readme.html) remains a historical tag and rule reference. The [license](LICENSE) applies to both source and generated files.

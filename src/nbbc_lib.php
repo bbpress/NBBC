@@ -57,11 +57,16 @@
 	//
 	//-----------------------------------------------------------------------------
 
+	/**
+	 * @phpstan-import-type BBCodeTag from BBCodeLexer
+	 * @phpstan-type BBCodeRule array{allow_in?: list<string>, class?: string, mode?: int, method?: callable|string, allow?: array<string,string>, default?: array<string,string>, plain_content?: list<string>, plain_link?: list<string>, simple_start?: string, simple_end?: string, plain_start?: string, plain_end?: string, template?: string, before_tag?: string, after_tag?: string, before_endtag?: string, after_endtag?: string, end_tag?: int, content?: int}
+	 */
 	class BBCodeLibrary {
 
 		//-----------------------------------------------------------------------------
 		// Standard library of smiley definitions.
 	
+		/** @var array<string, string> */
 		var $default_smileys = Array(
 			':)' => 'smile.gif',       ':-)' => 'smile.gif',
 			'=)' => 'smile.gif',       '=-)' => 'smile.gif',
@@ -120,6 +125,7 @@
 		//-----------------------------------------------------------------------------
 		// Standard rules for what to do when a BBCode tag is encountered.
 
+		/** @var array<string, BBCodeRule> */
 		var $default_tag_rules = Array(
 		
 			'b' => Array(
@@ -404,6 +410,15 @@
 
 		// Format a [url] tag by producing an <a>...</a> element.
 		// The URL only allows http, https, mailto, and ftp protocols for safety.
+		/**
+		 * @param BBCode $bbcode
+		 * @param int $action
+		 * @param string $name
+		 * @param string|false $default
+		 * @param BBCodeTag $params
+		 * @param string $content
+		 * @return string|bool
+		 */
 		function DoURL($bbcode, $action, $name, $default, $params, $content) {
 			// We can't check this with BBCODE_CHECK because we may have no URL before the content
 			// has been processed.
@@ -421,12 +436,24 @@
 						$target = " target=\"" . htmlspecialchars($bbcode->url_target) . "\"";
 				return '<a href="' . htmlspecialchars($url) . '" class="bbcode_url"' . $target . '>' . $content . '</a>';
 			}
-			else return htmlspecialchars($params['_tag']) . $content . htmlspecialchars($params['_endtag']);
+			else {
+				$end_tag = (string) $params['_endtag'];
+				return htmlspecialchars($params['_tag']) . $content . htmlspecialchars($end_tag);
+			}
 		}
 
 		// Format an [email] tag by producing an <a>...</a> element.
 		// The e-mail address must be a valid address including at least a '@' and a valid domain
 		// name or IPv4 or IPv6 address after the '@'.
+		/**
+		 * @param BBCode $bbcode
+		 * @param int $action
+		 * @param string $name
+		 * @param string|false $default
+		 * @param BBCodeTag $params
+		 * @param string $content
+		 * @return string|bool
+		 */
 		function DoEmail($bbcode, $action, $name, $default, $params, $content) {
 			// We can't check this with BBCODE_CHECK because we may have no URL before the content
 			// has been processed.
@@ -435,10 +462,22 @@
 			$email = is_string($default) ? $default : $bbcode->UnHTMLEncode(strip_tags($content));
 			if ($bbcode->IsValidEmail($email))
 				return '<a href="mailto:' . htmlspecialchars($email) . '" class="bbcode_email">' . $content . '</a>';
-			else return htmlspecialchars($params['_tag']) . $content . htmlspecialchars($params['_endtag']);
+			else {
+				$end_tag = (string) $params['_endtag'];
+				return htmlspecialchars($params['_tag']) . $content . htmlspecialchars($end_tag);
+			}
 		}
 		
 		// Format a [size] tag by producing a <span> with a style with a different font-size.
+		/**
+		 * @param BBCode $bbcode
+		 * @param int $action
+		 * @param string $name
+		 * @param string|false $default
+		 * @param BBCodeTag $params
+		 * @param string $content
+		 * @return string|bool
+		 */
 		function DoSize($bbcode, $action, $name, $default, $params, $content) {
 			switch ($default) {
 			case '0': $size = '.5em'; break;
@@ -457,7 +496,17 @@
 		// Format a [font] tag by producing a <span> with a style with a different font-family.
 		// This is complicated by the fact that we have to recognize the five special font
 		// names and quote all the others.
+		/**
+		 * @param BBCode $bbcode
+		 * @param int $action
+		 * @param string $name
+		 * @param string|false $default
+		 * @param BBCodeTag $params
+		 * @param string $content
+		 * @return string|bool
+		 */
 		function DoFont($bbcode, $action, $name, $default, $params, $content) {
+			$default = is_string($default) ? $default : '';
 			$fonts = explode(",", $default);
 			$result = "";
 			$special_fonts = Array(
@@ -486,7 +535,17 @@
 		}
 
 		// Format a [wiki] tag by producing an <a>...</a> element.
+		/**
+		 * @param BBCode $bbcode
+		 * @param int $action
+		 * @param string $name
+		 * @param string|false $default
+		 * @param BBCodeTag $params
+		 * @param string $content
+		 * @return string|bool
+		 */
 		function DoWiki($bbcode, $action, $name, $default, $params, $content) {
+			$default = is_string($default) ? $default : '';
 			$name = $bbcode->Wikify($default);
 			if ($action == BBCODE_CHECK)
 				return strlen($name) > 0;
@@ -497,6 +556,15 @@
 		}
 
 		// Format an [img] tag.  The URL only allows http, https, and ftp protocols for safety.
+		/**
+		 * @param BBCode $bbcode
+		 * @param int $action
+		 * @param string $name
+		 * @param string|false $default
+		 * @param BBCodeTag $params
+		 * @param string $content
+		 * @return string|bool
+		 */
 		function DoImage($bbcode, $action, $name, $default, $params, $content) {
 			// We can't validate this until we have its content.
 			if ($action == BBCODE_CHECK) return true;
@@ -523,11 +591,21 @@
 				}
 			}
 
-			return htmlspecialchars($params['_tag']) . htmlspecialchars($content) . htmlspecialchars($params['_endtag']);
+			$end_tag = (string) $params['_endtag'];
+			return htmlspecialchars($params['_tag']) . htmlspecialchars($content) . htmlspecialchars($end_tag);
 		}
 
 		// Format a [rule] tag.  This substitutes the content provided by the BBCode
 		// object, whatever that may be.
+		/**
+		 * @param BBCode $bbcode
+		 * @param int $action
+		 * @param string $name
+		 * @param string|false $default
+		 * @param BBCodeTag $params
+		 * @param string $content
+		 * @return string|bool
+		 */
 		function DoRule($bbcode, $action, $name, $default, $params, $content) {
 			if ($action == BBCODE_CHECK) return true;
 			else return $bbcode->rule_html;
@@ -546,6 +624,15 @@
 		//  [quote name="Tom" date="July 4, 1776 3:48 PM" url="http://www.constitution.gov"]...[/quote]
 		//
 		// The URL only allows http, https, mailto, gopher, ftp, and feed protocols for safety.
+		/**
+		 * @param BBCode $bbcode
+		 * @param int $action
+		 * @param string $name
+		 * @param string|false $default
+		 * @param BBCodeTag $params
+		 * @param string $content
+		 * @return string|bool
+		 */
 		function DoQuote($bbcode, $action, $name, $default, $params, $content) {
 			if ($action == BBCODE_CHECK) return true;
 
@@ -583,6 +670,15 @@
 		//   [list=i]         Ordered list, lowercase Roman numerals, starting at i
 		//   [list=greek]     Ordered list, lowercase Greek letters, starting at alpha
 		//   [list=01]        Ordered list, two-digit numeric with 0-padding, starting at 01
+		/**
+		 * @param BBCode $bbcode
+		 * @param int $action
+		 * @param string $name
+		 * @param string|false $default
+		 * @param BBCodeTag $params
+		 * @param string $content
+		 * @return string|bool
+		 */
 		function DoList($bbcode, $action, $name, $default, $params, $content) {
 
 			// Allowed list styles, striaght from the CSS 2.1 spec.  The only prohibited
