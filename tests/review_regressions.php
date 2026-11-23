@@ -25,6 +25,11 @@ function nbbc_numeric_callback($bbcode, $action, $name, $default, $params, $cont
 	return BBCODE_CHECK === $action ? true : 42;
 }
 
+$enhanced_parser = new BBCode();
+expect_review_result($enhanced_parser->Internal_DoEnhancedTag(
+	array('template' => '{$_defaultcontent}:{$_content}'), array(), 'Body'),
+	'Body:Body', 'Enhanced tags use their content when no default was supplied');
+
 $callback_parser = new BBCode();
 $callback_parser->AddRule('number', array(
 	'mode' => BBCODE_MODE_CALLBACK,

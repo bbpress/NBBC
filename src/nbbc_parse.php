@@ -1975,7 +1975,8 @@
 
 			// Set up the special "_content" and "_defaultcontent" parameters.
 			$params['_content'] = $contents;
-			$params['_defaultcontent'] = is_string($params['_default']) && strlen($params['_default']) ? $params['_default'] : $contents;
+			$default_value = $params['_default'] ?? false;
+			$params['_defaultcontent'] = is_string($default_value) && strlen($default_value) ? $default_value : $contents;
 
 			// Now use common template-formatting logic.
 			$template = $tag_rule['template'] ?? '';
